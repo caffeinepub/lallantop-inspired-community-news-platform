@@ -1,0 +1,76 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add Privacy Policy and Terms of Service pages with footer links",
+  "requirements": [
+    {
+      "id": "REQ-21",
+      "summary": "Create Privacy Policy page at /privacy with 9 sections styled in Global Nexus theme",
+      "acceptanceCriteria": [
+        "Navigating to /privacy renders the Privacy Policy page without errors",
+        "All 9 sections (Introduction, Data Collection, User Consent, Data Usage, Legal Compliance, Data Security, User Rights, Transparency & Updates, Contact) are visible with their full text",
+        "Page background, headings, and accent elements use the Global Nexus blue (#1A6FBF) and black (#1a1a1a) theme",
+        "The Hindi/English language toggle button remains visible and functional on the page",
+        "Legal body text is displayed in English regardless of the active language selection"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/PrivacyPolicyPage.tsx",
+          "operation": "create",
+          "description": "Create the Privacy Policy page component displaying all 9 sections (Introduction, Data Collection, User Consent, Data Usage, Legal Compliance, Data Security, User Rights, Transparency & Updates, Contact) with their full text as provided by the user. Style the page using Global Nexus blue (#1A6FBF) for headers and accents, and black (#1a1a1a) for text, matching the existing platform theme defined in frontend/tailwind.config.js. The page must display within the Layout component so the Hindi/English language toggle UI remains visible and functional. The legal text itself must remain in English regardless of the active language selection. Structure the page with a page title, followed by each section with a heading and body text rendered in a readable, accessible format."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /privacy route in the TanStack Router route tree. Import the PrivacyPolicyPage component and add a new route configuration for the path '/privacy' alongside the existing routes (home, category, article, citizen-news, multimedia, admin, about). Ensure the route is wrapped by the Layout component so navigation and language toggle remain functional."
+        }
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "summary": "Create Terms of Service page at /terms with 11 sections styled in Global Nexus theme",
+      "acceptanceCriteria": [
+        "Navigating to /terms renders the Terms of Service page without errors",
+        "All 11 sections (Acceptance of Terms, User Responsibilities, Content Submission, Community Standards, Platform Use, Data & Privacy, Legal Compliance, Limitation of Liability, Termination, Updates to Terms, Contact) are visible with their full text",
+        "Page background, headings, and accent elements use the Global Nexus blue (#1A6FBF) and black (#1a1a1a) theme",
+        "The Hindi/English language toggle button remains visible and functional on the page",
+        "Legal body text is displayed in English regardless of the active language selection"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/TermsOfServicePage.tsx",
+          "operation": "create",
+          "description": "Create the Terms of Service page component displaying all 11 sections (Acceptance of Terms, User Responsibilities, Content Submission, Community Standards, Platform Use, Data & Privacy, Legal Compliance, Limitation of Liability, Termination, Updates to Terms, Contact) with their full text as provided by the user. Style the page using Global Nexus blue (#1A6FBF) for headers and accents, and black (#1a1a1a) for text, matching the existing platform theme defined in frontend/tailwind.config.js. The page must display within the Layout component so the Hindi/English language toggle UI remains visible and functional. The legal text itself must remain in English regardless of the active language selection. Structure the page with a page title, followed by each section with a heading and body text rendered in a readable, accessible format."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /terms route in the TanStack Router route tree. Import the TermsOfServicePage component and add a new route configuration for the path '/terms' alongside the existing routes (home, category, article, citizen-news, multimedia, admin, about, privacy). Ensure the route is wrapped by the Layout component so navigation and language toggle remain functional."
+        }
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "summary": "Add Privacy Policy and Terms of Service links to the footer navigation",
+      "acceptanceCriteria": [
+        "Footer displays a 'Privacy Policy' link that navigates to /privacy",
+        "Footer displays a 'Terms of Service' link that navigates to /terms",
+        "Both new links appear alongside the existing 'About' link in the footer navigation",
+        "All previously existing footer links (About, Contact, category links) and copyright text remain intact",
+        "New links are styled consistently with the existing footer link style"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Update the footer section to add 'Privacy Policy' and 'Terms of Service' links alongside the existing 'About' link. The Privacy Policy link must navigate to /privacy and the Terms of Service link must navigate to /terms. Both links must use the same styling as the existing footer links (text-gray-400 hover:text-white transition-colors). Ensure the links support the current language context by using translations from frontend/src/constants/translations.ts for the link labels. Position the new links in the footer navigation so they appear with the existing About link, maintaining visual consistency and alignment with the current footer layout. Do not modify the existing copyright line, Global Nexus branding, category links, or any other footer elements."
+        },
+        {
+          "path": "frontend/src/constants/translations.ts",
+          "operation": "modify",
+          "description": "Add translation keys for 'Privacy Policy' and 'Terms of Service' link labels in both English and Hindi. Add new keys under an appropriate section (e.g., 'footer' or 'navigation') in both the English and Hindi translation objects. The English labels should be 'Privacy Policy' and 'Terms of Service'. The Hindi labels should be appropriate translations (e.g., 'गोपनीयता नीति' for Privacy Policy and 'सेवा की शर्तें' for Terms of Service). Ensure the keys are consistently named and accessible to the Layout component."
+        }
+      ]
+    }
+  ]
+}

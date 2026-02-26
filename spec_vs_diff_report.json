@@ -1,0 +1,18 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-26T09:56:13.756Z",
+  "summary": "All three requirements are implemented in the diff. REQ-21 is addressed by the new PrivacyPolicyPage.tsx with all 9 sections and /privacy route in App.tsx. REQ-22 is addressed by the new TermsOfServicePage.tsx with all 11 sections and /terms route in App.tsx. REQ-23 is addressed by updates to Layout.tsx adding Privacy Policy and Terms of Service footer links. The blue/black color theme, language toggle presence, and English-only legal text are consistent with the implementation. The language toggle is inherited via Layout.tsx which wraps all pages. The diff summary confirms the footer was updated to add new links as proper Link components without removing existing ones.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.91,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/constants/translations.ts",
+    "frontend/src/pages/PrivacyPolicyPage.tsx",
+    "frontend/src/pages/TermsOfServicePage.tsx",
+    "project_state.json"
+  ]
+}

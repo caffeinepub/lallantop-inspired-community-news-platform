@@ -1,0 +1,65 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-privacy-policy-page-at-route-privacy-displaying-all-9-sections-1-introduction-2-data-collection-3-user-consent-4-data-usage-5-legal-compliance-6-data-security-7-user-rights-8-transparency-updates-9-contact-render-the-full-text-provided-by-the-user-for-each-section-style-the-page-using-the-global-nexus-blue-1a6fbf-and-black-1a1a1a-color-theme-consistent-with-the-rest-of-the-platform-the-hindi-english-language-toggle-ui-must-remain-intact-and-functional-the-legal-text-itself-is-displayed-in-english-only-regardless-of-the-active-language-register-the-privacy-route-in-app-tsx",
+      "featureTitle": "Create a Privacy Policy page at route /privacy displaying all 9 sections: (1) Introduction, (2) Data Collection, (3) User Consent, (4) Data Usage, (5) Legal Compliance, (6) Data Security, (7) User Rights, (8) Transparency & Updates, (9) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /privacy route in App.tsx.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/PrivacyPolicyPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-21"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-terms-of-service-page-at-route-terms-displaying-all-11-sections-1-acceptance-of-terms-2-user-responsibilities-3-content-submission-4-community-standards-5-platform-use-6-data-privacy-7-legal-compliance-8-limitation-of-liability-9-termination-10-updates-to-terms-11-contact-render-the-full-text-provided-by-the-user-for-each-section-style-the-page-using-the-global-nexus-blue-1a6fbf-and-black-1a1a1a-color-theme-consistent-with-the-rest-of-the-platform-the-hindi-english-language-toggle-ui-must-remain-intact-and-functional-the-legal-text-itself-is-displayed-in-english-only-regardless-of-the-active-language-register-the-terms-route-in-app-tsx",
+      "featureTitle": "Create a Terms of Service page at route /terms displaying all 11 sections: (1) Acceptance of Terms, (2) User Responsibilities, (3) Content Submission, (4) Community Standards, (5) Platform Use, (6) Data & Privacy, (7) Legal Compliance, (8) Limitation of Liability, (9) Termination, (10) Updates to Terms, (11) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /terms route in App.tsx.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/TermsOfServicePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-22"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-site-footer-to-add-privacy-policy-and-terms-of-service-links-alongside-the-existing-about-link-the-privacy-policy-link-must-navigate-to-privacy-and-the-terms-of-service-link-must-navigate-to-terms-both-links-must-be-visually-prominent-and-consistent-with-the-existing-footer-navigation-style-the-footer-copyright-line-global-nexus-branding-and-all-existing-footer-links-about-contact-category-links-must-remain-unchanged",
+      "featureTitle": "Update the site footer to add 'Privacy Policy' and 'Terms of Service' links alongside the existing 'About' link. The Privacy Policy link must navigate to /privacy and the Terms of Service link must navigate to /terms. Both links must be visually prominent and consistent with the existing footer navigation style. The footer copyright line, Global Nexus branding, and all existing footer links (About, Contact, category links) must remain unchanged.",
+      "files": [
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/constants/translations.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-23"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 11,
+  "summary": "Multilingual community-driven news platform rebranded to 'Global Nexus', founded by Pawnesh Kumar Singh. Features include a dense multi-column homepage with horizontal top nav, breaking news ticker, Hindi/English manual language toggle, citizen journalism public page, community comments, personalized feeds, multimedia section (YouTube embeds, podcast links, short-form content), and admin/editor accounts for official publishing. Platform color scheme updated to blue (#1A6FBF), black (#1a1a1a), and white (replacing red/saffron). Logo replaced with uploaded Global Nexus logo. About/Founder page added in the footer featuring Pawnesh Kumar Singh's bio and photo. Privacy Policy (/privacy) and Terms of Service (/terms) pages added with full legal text, styled in blue/black theme, linked from footer alongside About link.",
+  "architectural_notes": [
+    "AI-generated news uses rich placeholder/mock content — architecture is ready to plug in live AI/translation APIs later",
+    "No real-time WebSockets; breaking news ticker and comments use refresh-based updates",
+    "Multimedia section uses embedded external content (YouTube, podcast links) rather than direct file uploads",
+    "Platform logo uses user-uploaded logo.png (Global Nexus branding) rather than a generated image"
+  ],
+  "known_issues": [
+    "Article not visible in a section of the homepage/category pages — user reports article missing from what appears to be an empty/void section"
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-build-the-top-level-app-layout-with-a-full-width-horizontal-top-navigation-bar-styled-after-lallantop-times-of-india-the-nav-must-include-platform-logo-name-on-the-left-category-links-home-india-world-sports-entertainment-technology-business-citizen-reports-multimedia-a-hindi-english-language-toggle-button-and-an-internet-identity-login-logout-button-below-the-nav-render-a-breaking-news-scrolling-ticker-showing-the-latest-breaking-articles-the-layout-must-be-dense-and-content-rich-using-a-dark-red-saffron-and-white-color-scheme-inspired-by-indian-news-portals",
+      "title": "Build the top-level app layout with a full-width horizontal top navigation bar styled after Lallantop/Times of India. The nav must include: platform logo/name on the left, category links (Home, India, World, Sports, Entertainment, Technology, Business, Citizen Reports, Multimedia), a Hindi/English language toggle button, and an Internet Identity login/logout button. Below the nav, render a breaking news scrolling ticker showing the latest breaking articles. The layout must be dense and content-rich, using a dark red/saffron and white color scheme inspired by Indian news portals.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-homepage-with-a-dense-multi-column-layout-at-the-top-a-large-featured-breaking-news-hero-section-with-the-top-featured-article-image-headline-category-badge-excerpt-below-it-display-a-grid-of-category-sections-each-showing-3-4-article-cards-in-a-multi-column-layout-similar-to-toi-homepage-category-sections-to-show-india-world-sports-entertainment-technology-business-each-article-card-shows-thumbnail-headline-in-active-language-category-badge-author-and-timestamp-include-a-sidebar-column-with-a-most-read-list-and-a-citizen-spotlight-panel-showing-the-3-latest-approved-citizen-posts",
+      "title": "Build the homepage with a dense multi-column layout. At the top, a large Featured/Breaking News hero section with the top featured article (image, headline, category badge, excerpt). Below it, display a grid of category sections, each showing 3–4 article cards in a multi-column layout (similar to TOI homepage). Category sections to show: India, World, Sports, Entertainment, Technology, Business. Each article card shows: thumbnail, headline (in active language), category badge, author, and timestamp. Include a sidebar column with a 'Most Read' list and a 'Citizen Spotlight' panel showing the 3 latest approved citizen posts.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-individual-category-pages-india-world-sports-entertainment-technology-business-citizen-reports-that-display-all-articles-for-that-category-in-a-paginated-list-with-article-cards-thumbnail-headline-excerpt-author-date-each-article-card-links-to-an-article-detail-page-the-article-detail-page-shows-full-article-image-headline-body-text-author-date-category-badge-a-comments-section-at-the-bottom-with-ability-to-post-a-comment-requires-internet-identity-login-and-a-related-articles-sidebar",
+      "title": "Build individual category pages (India, World, Sports, Entertainment, Technology, Business, Citizen Reports) that display all articles for that category in a paginated list with article cards (thumbnail, headline, excerpt, author, date). Each article card links to an article detail page. The article detail page shows: full article image, headline, body text, author, date, category badge, a comments section at the bottom with ability to post a comment (requires Internet Identity login), and a 'Related Articles' sidebar.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-public-citizen-news-page-accessible-from-main-navigation-this-page-lists-all-approved-citizen-posts-with-cards-title-category-badge-author-date-image-if-provided-at-the-top-show-a-filter-bar-for-subcategories-all-government-issues-local-problems-citizen-reports-logged-in-users-see-a-submit-your-story-button-that-opens-a-post-creation-form-with-title-input-rich-text-body-editor-textarea-category-selector-government-issues-local-problems-citizen-reports-and-optional-image-url-input-submitted-posts-are-saved-via-createcitizenpost-and-appear-pending-admin-approval-each-post-has-a-detail-view-with-comments",
+      "title": "Build the Public/Citizen News page accessible from main navigation. This page lists all approved citizen posts with cards (title, category badge, author, date, image if provided). At the top, show a filter bar for subcategories: All, Government Issues, Local Problems, Citizen Reports. Logged-in users see a 'Submit Your Story' button that opens a post creation form with: title input, rich text body editor (textarea), category selector (Government Issues / Local Problems / Citizen Reports), and optional image URL input. Submitted posts are saved via createCitizenPost and appear pending admin approval. Each post has a detail view with comments.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-multimedia-section-page-accessible-from-main-navigation-with-three-tabs-videos-podcasts-and-reels-short-form-videos-tab-shows-a-grid-of-cards-with-youtube-embedded-thumbnails-and-titles-clicking-opens-a-modal-with-the-youtube-iframe-embed-podcasts-tab-shows-a-list-of-podcast-entries-with-title-description-and-an-external-link-button-reels-tab-shows-a-grid-of-short-form-content-cards-with-embedded-thumbnails-and-external-links-seed-the-backend-with-at-least-6-placeholder-media-items-across-the-three-types",
+      "title": "Build the Multimedia section page accessible from main navigation with three tabs: Videos, Podcasts, and Reels/Short-form. Videos tab shows a grid of cards with YouTube-embedded thumbnails and titles, clicking opens a modal with the YouTube iframe embed. Podcasts tab shows a list of podcast entries with title, description, and an external link button. Reels tab shows a grid of short-form content cards with embedded thumbnails and external links. Seed the backend with at least 6 placeholder media items across the three types.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-an-admin-dashboard-page-accessible-only-to-users-with-admin-or-editor-roles-redirect-others-to-homepage-the-dashboard-has-two-sections-article-management-list-all-articles-with-edit-delete-and-a-form-to-create-new-articles-with-fields-title-en-title-hi-body-en-body-hi-category-imageurl-isbreaking-toggle-isfeatured-toggle-and-citizen-post-moderation-list-all-citizen-posts-with-pending-status-and-approve-reject-buttons-that-call-backend-update-functions",
+      "title": "Build an Admin Dashboard page accessible only to users with admin or editor roles (redirect others to homepage). The dashboard has two sections: Article Management (list all articles with edit/delete, and a form to create new articles with fields: title EN, title HI, body EN, body HI, category, imageUrl, isBreaking toggle, isFeatured toggle) and Citizen Post Moderation (list all citizen posts with pending status, and approve/reject buttons that call backend update functions).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-hindi-english-language-context-using-react-context-api-store-active-language-in-state-default-english-the-language-toggle-in-the-nav-switches-between-en-and-hi-all-static-ui-strings-nav-labels-button-text-section-headings-form-labels-placeholder-text-must-have-both-english-and-hindi-translations-defined-in-a-translations-constants-file-article-headlines-and-body-text-use-the-language-specific-fields-from-the-backend-title-vs-titlehindi-body-vs-bodyhindi-when-the-active-language-is-hindi",
+      "title": "Implement a Hindi/English language context using React Context API. Store active language in state (default: English). The language toggle in the nav switches between 'EN' and 'HI'. All static UI strings (nav labels, button text, section headings, form labels, placeholder text) must have both English and Hindi translations defined in a translations constants file. Article headlines and body text use the language-specific fields from the backend (title vs titleHindi, body vs bodyHindi) when the active language is Hindi.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-consistent-visual-design-theme-across-the-entire-platform-inspired-by-indian-news-portals-lallantop-times-of-india-firstpost-use-a-color-palette-of-deep-red-c0392b-saffron-amber-e67e22-dark-charcoal-1a1a1a-and-white-light-gray-typography-should-use-a-bold-high-contrast-headline-font-the-homepage-must-feel-dense-and-content-rich-with-tight-spacing-between-cards-category-badges-should-use-distinct-accent-colors-the-breaking-news-ticker-should-have-a-red-background-with-white-scrolling-text-mobile-responsive-layout-is-required",
+      "title": "Apply a consistent visual design theme across the entire platform inspired by Indian news portals (Lallantop, Times of India, Firstpost). Use a color palette of deep red (#C0392B), saffron/amber (#E67E22), dark charcoal (#1a1a1a), and white/light gray. Typography should use a bold, high-contrast headline font. The homepage must feel dense and content-rich with tight spacing between cards. Category badges should use distinct accent colors. The breaking news ticker should have a red background with white scrolling text. Mobile-responsive layout is required.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-platform-logo-image-a-bold-newspaper-style-masthead-logo-with-the-name-samachar-hub-in-english-and-a-subtle-hindi-script-subtitle-using-deep-red-and-saffron-colors-on-a-white-background-with-a-subtle-newspaper-press-icon",
+      "title": "Generate a platform logo image: a bold newspaper-style masthead logo with the name 'Samachar Hub' in English and a subtle Hindi script subtitle 'समाचार हब', using deep red and saffron colors on a white background, with a subtle newspaper/press icon.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-homepage-hero-banner-background-image-a-dramatic-high-contrast-montage-of-india-s-iconic-landmarks-parliament-newspapers-crowd-dark-and-editorial-in-tone-suitable-as-a-background-behind-the-featured-article-hero-section",
+      "title": "Generate a homepage hero banner background image: a dramatic, high-contrast montage of India's iconic landmarks (parliament, newspapers, crowd), dark and editorial in tone, suitable as a background behind the featured article hero section.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rebrand-the-entire-platform-from-samachar-hub-to-global-nexus-update-the-platform-name-in-all-locations-including-the-page-title-in-index-html-the-nav-header-the-footer-the-admin-dashboard-and-any-other-text-references-replace-the-existing-generated-logo-with-the-uploaded-logo-png-file-blue-globe-icon-bold-black-global-nexus-text-blue-news-subtitle-in-the-navigation-header-store-logo-png-as-a-static-asset-at-frontend-public-assets-logo-png-and-reference-it-via-an-img-tag-in-the-layout-nav-component",
+      "title": "Rebrand the entire platform from 'Samachar Hub' to 'Global Nexus'. Update the platform name in all locations including the page title in index.html, the nav header, the footer, the admin dashboard, and any other text references. Replace the existing generated logo with the uploaded logo.png file (blue globe icon, bold black 'GLOBAL NEXUS' text, blue 'न्यूज NEWS' subtitle) in the navigation header. Store logo.png as a static asset at frontend/public/assets/logo.png and reference it via an <img> tag in the Layout nav component.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-entire-platform-color-scheme-to-match-the-global-nexus-logo-replace-all-red-c0392b-and-saffron-e67e22-color-references-with-blue-1a6fbf-and-black-1a1a1a-this-includes-tailwind-config-custom-colors-replace-news-red-and-saffron-with-news-blue-variants-css-custom-properties-in-index-css-the-breaking-news-ticker-background-change-from-red-to-blue-1a6fbf-category-badges-nav-bar-background-and-text-buttons-hover-states-and-any-inline-color-classes-used-in-components-including-layout-tsx-breakingnewsticker-tsx-categorybadge-tsx-featuredhero-tsx-and-all-page-components",
+      "title": "Update the entire platform color scheme to match the Global Nexus logo. Replace all red (#C0392B) and saffron (#E67E22) color references with blue (#1A6FBF) and black (#1a1a1a). This includes: Tailwind config custom colors (replace news-red and saffron with news-blue variants), CSS custom properties in index.css, the breaking news ticker background (change from red to blue #1A6FBF), category badges, nav bar background and text, buttons, hover states, and any inline color classes used in components including Layout.tsx, BreakingNewsTicker.tsx, CategoryBadge.tsx, FeaturedHero.tsx, and all page components.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-about-founder-page-at-route-about-that-displays-the-founder-s-profile-the-page-must-include-the-uploaded-founder-portrait-photo-pawnesh-kumar-singh-professional-headshot-with-dark-blue-shirt-displayed-prominently-the-founder-s-full-name-pawnesh-kumar-singh-as-a-heading-with-title-founder-ceo-global-nexus-and-the-following-bio-text-rendered-in-full-pawnesh-kumar-singh-is-the-visionary-founder-and-ceo-of-global-nexus-a-multilingual-news-and-policy-platform-dedicated-to-empowering-communities-through-real-time-reporting-ai-driven-analysis-and-citizen-engagement-with-a-master-s-degree-in-geography-and-a-specialization-in-climate-resilience-pawnesh-brings-a-multidisciplinary-lens-to-global-development-public-policy-and-child-centered-advocacy-he-is-a-strategic-communicator-known-for-his-analytical-rigor-cross-cultural-fluency-and-commitment-to-equity-focused-solutions-through-global-nexus-pawnesh-merges-grassroots-reporting-with-cutting-edge-technology-creating-a-space-where-local-voices-meet-global-narratives-his-experience-spans-research-on-child-trafficking-climate-migration-and-constitutional-ethics-and-he-has-authored-influential-articles-and-led-community-mapping-initiatives-pawnesh-s-leadership-reflects-a-deep-belief-in-inclusive-journalism-civic-empowerment-and-the-transformative-power-of-information-under-his-guidance-global-nexus-is-not-just-a-news-platform-it-is-a-movement-for-transparency-dialogue-and-sustainable-change-store-the-founder-photo-as-frontend-public-assets-founder-jpg-and-reference-it-via-an-img-tag-register-the-about-route-in-app-tsx",
+      "title": "Create an About/Founder page at route /about that displays the founder's profile. The page must include: the uploaded founder portrait photo (Pawnesh Kumar Singh — professional headshot with dark blue shirt) displayed prominently, the founder's full name 'Pawnesh Kumar Singh' as a heading with title 'Founder & CEO, Global Nexus', and the following bio text rendered in full: 'Pawnesh Kumar Singh is the visionary Founder and CEO of Global Nexus, a multilingual news and policy platform dedicated to empowering communities through real-time reporting, AI-driven analysis, and citizen engagement. With a Master's degree in Geography and a specialization in climate resilience, Pawnesh brings a multidisciplinary lens to global development, public policy, and child-centered advocacy. He is a strategic communicator known for his analytical rigor, cross-cultural fluency, and commitment to equity-focused solutions. Through Global Nexus, Pawnesh merges grassroots reporting with cutting-edge technology—creating a space where local voices meet global narratives. His experience spans research on child trafficking, climate migration, and constitutional ethics, and he has authored influential articles and led community mapping initiatives. Pawnesh's leadership reflects a deep belief in inclusive journalism, civic empowerment, and the transformative power of information. Under his guidance, Global Nexus is not just a news platform—it is a movement for transparency, dialogue, and sustainable change.' Store the founder photo as frontend/public/assets/founder.jpg and reference it via an <img> tag. Register the /about route in App.tsx.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-site-footer-to-prominently-feature-an-about-link-that-navigates-to-the-about-page-the-footer-should-include-the-global-nexus-logo-or-platform-name-on-the-left-a-navigation-column-with-links-including-about-contact-and-main-category-links-and-a-copyright-line-reading-2025-global-nexus-all-rights-reserved-the-about-link-must-be-visually-prominent-not-buried-remove-any-previous-footer-placeholder-content-referencing-samachar-hub",
+      "title": "Redesign the site footer to prominently feature an 'About' link that navigates to the /about page. The footer should include: the Global Nexus logo or platform name on the left, a navigation column with links including 'About', 'Contact', and main category links, and a copyright line reading '© 2025 Global Nexus. All rights reserved.' The About link must be visually prominent (not buried). Remove any previous footer placeholder content referencing 'Samachar Hub'.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-homepage-categorysection-components-so-that-if-getarticlesbycategory-returns-an-empty-array-for-a-given-category-the-section-renders-a-visible-fallback-message-no-articles-yet-for-this-category-instead-of-rendering-a-blank-void-area-also-ensure-the-data-fetching-query-for-each-category-section-is-correctly-passing-the-category-string-matching-the-backend-enum-values",
+      "title": "Fix the homepage CategorySection components so that if getArticlesByCategory returns an empty array for a given category, the section renders a visible fallback message ('No articles yet for this category') instead of rendering a blank/void area. Also ensure the data-fetching query for each category section is correctly passing the category string matching the backend enum values.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-and-fix-the-featuredhero-component-so-it-correctly-surfaces-the-top-featured-article-if-getfeaturedarticles-returns-an-empty-array-fall-back-to-the-most-recently-published-article-ensure-the-hero-section-never-renders-as-a-blank-void-area",
+      "title": "Verify and fix the FeaturedHero component so it correctly surfaces the top featured article. If getFeaturedArticles returns an empty array, fall back to the most recently published article. Ensure the hero section never renders as a blank/void area.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-after-a-user-logs-in-with-internet-identity-display-their-principal-id-prominently-on-the-frontend-so-it-can-be-easily-copied-this-should-appear-in-a-visible-location-e-g-in-the-nav-dropdown-a-profile-section-or-a-small-banner-toast-as-a-copyable-text-string-include-a-copy-button-that-copies-the-principal-id-to-the-clipboard-and-shows-a-brief-confirmation-e-g-copied-the-principal-id-display-should-only-be-visible-when-the-user-is-authenticated",
+      "title": "After a user logs in with Internet Identity, display their principal ID prominently on the frontend so it can be easily copied. This should appear in a visible location (e.g., in the nav dropdown, a profile section, or a small banner/toast) as a copyable text string. Include a 'Copy' button that copies the principal ID to the clipboard and shows a brief confirmation (e.g., 'Copied!'). The principal ID display should only be visible when the user is authenticated.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-privacy-policy-page-at-route-privacy-displaying-all-9-sections-1-introduction-2-data-collection-3-user-consent-4-data-usage-5-legal-compliance-6-data-security-7-user-rights-8-transparency-updates-9-contact-render-the-full-text-provided-by-the-user-for-each-section-style-the-page-using-the-global-nexus-blue-1a6fbf-and-black-1a1a1a-color-theme-consistent-with-the-rest-of-the-platform-the-hindi-english-language-toggle-ui-must-remain-intact-and-functional-the-legal-text-itself-is-displayed-in-english-only-regardless-of-the-active-language-register-the-privacy-route-in-app-tsx",
+      "title": "Create a Privacy Policy page at route /privacy displaying all 9 sections: (1) Introduction, (2) Data Collection, (3) User Consent, (4) Data Usage, (5) Legal Compliance, (6) Data Security, (7) User Rights, (8) Transparency & Updates, (9) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /privacy route in App.tsx.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-terms-of-service-page-at-route-terms-displaying-all-11-sections-1-acceptance-of-terms-2-user-responsibilities-3-content-submission-4-community-standards-5-platform-use-6-data-privacy-7-legal-compliance-8-limitation-of-liability-9-termination-10-updates-to-terms-11-contact-render-the-full-text-provided-by-the-user-for-each-section-style-the-page-using-the-global-nexus-blue-1a6fbf-and-black-1a1a1a-color-theme-consistent-with-the-rest-of-the-platform-the-hindi-english-language-toggle-ui-must-remain-intact-and-functional-the-legal-text-itself-is-displayed-in-english-only-regardless-of-the-active-language-register-the-terms-route-in-app-tsx",
+      "title": "Create a Terms of Service page at route /terms displaying all 11 sections: (1) Acceptance of Terms, (2) User Responsibilities, (3) Content Submission, (4) Community Standards, (5) Platform Use, (6) Data & Privacy, (7) Legal Compliance, (8) Limitation of Liability, (9) Termination, (10) Updates to Terms, (11) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /terms route in App.tsx.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-site-footer-to-add-privacy-policy-and-terms-of-service-links-alongside-the-existing-about-link-the-privacy-policy-link-must-navigate-to-privacy-and-the-terms-of-service-link-must-navigate-to-terms-both-links-must-be-visually-prominent-and-consistent-with-the-existing-footer-navigation-style-the-footer-copyright-line-global-nexus-branding-and-all-existing-footer-links-about-contact-category-links-must-remain-unchanged",
+      "title": "Update the site footer to add 'Privacy Policy' and 'Terms of Service' links alongside the existing 'About' link. The Privacy Policy link must navigate to /privacy and the Terms of Service link must navigate to /terms. Both links must be visually prominent and consistent with the existing footer navigation style. The footer copyright line, Global Nexus branding, and all existing footer links (About, Contact, category links) must remain unchanged.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Horizontal top navigation bar with categories (India, World, Sports, Entertainment, Technology, Business, Citizen Reports)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Multi-column dense homepage layout with articles listed under each category",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Breaking news ticker at the top of the page",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Hindi/English manual language toggle with pre-translated UI strings",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Featured/Breaking News hero section on homepage",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Public/Citizen News page with post creation (text editor, image upload, category tagging) and Internet Identity login",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Citizen post categories: Government Issues, Local Problems, Citizen Reports — all publicly visible",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Community comments on articles and personalized category-based feed",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Multimedia section with YouTube embeds, podcast external links, and short-form/reels content",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Admin/editor accounts with official article publishing and article management dashboard",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Create a Motoko backend actor with data models and CRUD operations for: Articles (id, title, titleHindi, body, bodyHindi, category, author, authorRole, imageUrl, publishedAt, isBreaking, isFeatured), CitizenPosts (id, title, body, category, authorPrincipal, authorName, imageUrl, publishedAt, status), Comments (id, articleId, postId, authorPrincipal, authorName, body, createdAt), and MediaItems (id, type[video/podcast/reel], title, embedUrl, thumbnailUrl, publishedAt). Seed with at least 15 realistic placeholder articles across all categories (India, World, Sports, Entertainment, Technology, Business) with both English and Hindi content. Include stable query functions: getArticles, getArticlesByCategory, getBreakingNews, getFeaturedArticles, getCitizenPosts, getCommentsByArticle, getMediaItems, and mutation functions: createCitizenPost, addComment, createArticle (admin only), updateArticleStatus.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement a principal-based role system in the backend: roles are 'admin', 'editor', and 'citizen'. Maintain a registry mapping Principal to role. Expose getRoleForPrincipal, assignRole (admin only), and isAdmin/isEditor helper functions. Seed two admin principals (hardcoded placeholders) for testing. Citizen users are auto-registered on first post/comment.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Rebrand platform from 'Samachar Hub' to 'Global Nexus' — update name everywhere, replace logo with uploaded logo.png in nav header",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Update entire platform color scheme to match Global Nexus logo: blue (#1A6FBF), black (#1a1a1a), and white — replacing red/saffron theme across nav, ticker, badges, buttons, and all UI elements",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add About/Founder page in the footer featuring Pawnesh Kumar Singh's bio and uploaded portrait photo. Footer redesigned to include About page link prominently.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Audit the backend seed data to ensure at least 3–4 articles exist for every category (India, World, Sports, Entertainment, Technology, Business) with valid content in both English and Hindi fields. Any category with zero or insufficient seeded articles must have new placeholder articles added so no category section renders empty on the homepage or category pages.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Display logged-in user's Internet Identity principal ID on screen after login so it can be easily copied (for admin setup purposes)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Add /privacy page with full 9-section Privacy Policy and /terms page with full 11-section Terms of Service, both styled in Global Nexus blue/black theme, linked from footer alongside About link, with Hindi/English toggle UI intact and English legal text displayed.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Lallantop-Inspired Community News Platform",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

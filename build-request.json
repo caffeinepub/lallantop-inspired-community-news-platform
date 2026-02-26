@@ -1,0 +1,92 @@
+{
+  "kind": "build_request",
+  "title": "Add Privacy Policy and Terms of Service pages with footer links",
+  "projectName": "Global Nexus",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-21",
+      "text": "Create a Privacy Policy page at route /privacy displaying all 9 sections: (1) Introduction, (2) Data Collection, (3) User Consent, (4) Data Usage, (5) Legal Compliance, (6) Data Security, (7) User Rights, (8) Transparency & Updates, (9) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /privacy route in App.tsx.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3",
+          "msg-7",
+          "msg-9"
+        ],
+        "quotes": [
+          "Full Privacy Policy page with 9 sections from your upload",
+          "Both pages will match the global nexus blue-black color theme",
+          "Both pages will support the Hindi-English language toggle English text disabled, displayed with the toggle UI intact"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating to /privacy renders the Privacy Policy page without errors",
+        "All 9 sections (Introduction, Data Collection, User Consent, Data Usage, Legal Compliance, Data Security, User Rights, Transparency & Updates, Contact) are visible with their full text",
+        "Page background, headings, and accent elements use the Global Nexus blue (#1A6FBF) and black (#1a1a1a) theme",
+        "The Hindi/English language toggle button remains visible and functional on the page",
+        "Legal body text is displayed in English regardless of the active language selection"
+      ]
+    },
+    {
+      "id": "REQ-22",
+      "text": "Create a Terms of Service page at route /terms displaying all 11 sections: (1) Acceptance of Terms, (2) User Responsibilities, (3) Content Submission, (4) Community Standards, (5) Platform Use, (6) Data & Privacy, (7) Legal Compliance, (8) Limitation of Liability, (9) Termination, (10) Updates to Terms, (11) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /terms route in App.tsx.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-7",
+          "msg-9"
+        ],
+        "quotes": [
+          "Full Terms of Service with 11 sections from your upload",
+          "Both pages will match the global nexus blue-black color theme",
+          "Both pages will support the Hindi-English language toggle English text disabled, displayed with the toggle UI intact"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating to /terms renders the Terms of Service page without errors",
+        "All 11 sections (Acceptance of Terms, User Responsibilities, Content Submission, Community Standards, Platform Use, Data & Privacy, Legal Compliance, Limitation of Liability, Termination, Updates to Terms, Contact) are visible with their full text",
+        "Page background, headings, and accent elements use the Global Nexus blue (#1A6FBF) and black (#1a1a1a) theme",
+        "The Hindi/English language toggle button remains visible and functional on the page",
+        "Legal body text is displayed in English regardless of the active language selection"
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Update the site footer to add 'Privacy Policy' and 'Terms of Service' links alongside the existing 'About' link. The Privacy Policy link must navigate to /privacy and the Terms of Service link must navigate to /terms. Both links must be visually prominent and consistent with the existing footer navigation style. The footer copyright line, Global Nexus branding, and all existing footer links (About, Contact, category links) must remain unchanged.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7",
+          "msg-9"
+        ],
+        "quotes": [
+          "footer links and both pages will be added alongside the existing about link"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Footer displays a 'Privacy Policy' link that navigates to /privacy",
+        "Footer displays a 'Terms of Service' link that navigates to /terms",
+        "Both new links appear alongside the existing 'About' link in the footer navigation",
+        "All previously existing footer links (About, Contact, category links) and copyright text remain intact",
+        "New links are styled consistently with the existing footer link style"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Legal body text must remain in English only — do not require Hindi translations of the Privacy Policy or Terms of Service body content",
+    "No backend changes are required for these static content pages"
+  ],
+  "nonGoals": [
+    "Hindi translation of the Privacy Policy or Terms of Service legal text",
+    "Backend storage of legal document content",
+    "User consent tracking or acceptance flow",
+    "Contact form functionality on the Privacy Policy or Terms of Service pages"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
