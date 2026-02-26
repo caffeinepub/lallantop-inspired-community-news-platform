@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Noto+Sans+Devanagari:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.25rem;
+
+    /* Global Nexus color palette — blue, black, white */
+    --background: 0.98 0 0;
+    --foreground: 0.12 0.01 250;
+    --card: 1 0 0;
+    --card-foreground: 0.12 0.01 250;
+    --popover: 1 0 0;
+    --popover-foreground: 0.12 0.01 250;
+
+    /* Global Nexus blue as primary */
+    --primary: 0.48 0.16 240;
+    --primary-foreground: 0.98 0 0;
+
+    /* Lighter blue as secondary */
+    --secondary: 0.62 0.14 240;
+    --secondary-foreground: 0.98 0 0;
+
+    --muted: 0.95 0.005 240;
+    --muted-foreground: 0.48 0.01 240;
+    --accent: 0.93 0.01 240;
+    --accent-foreground: 0.12 0.01 250;
+
+    --destructive: 0.52 0.22 25;
+    --destructive-foreground: 0.98 0 0;
+
+    --border: 0.88 0.005 240;
+    --input: 0.88 0.005 240;
+    --ring: 0.48 0.16 240;
+
+    --chart-1: 0.48 0.16 240;
+    --chart-2: 0.62 0.14 200;
+    --chart-3: 0.38 0.10 260;
+    --chart-4: 0.72 0.12 180;
+    --chart-5: 0.55 0.18 220;
+
+    --sidebar: 0.12 0.01 250;
+    --sidebar-foreground: 0.98 0 0;
+    --sidebar-primary: 0.48 0.16 240;
+    --sidebar-primary-foreground: 0.98 0 0;
+    --sidebar-accent: 0.2 0.01 250;
+    --sidebar-accent-foreground: 0.98 0 0;
+    --sidebar-border: 0.25 0.01 250;
+    --sidebar-ring: 0.48 0.16 240;
+  }
+
+  .dark {
+    --background: 0.1 0.01 250;
+    --foreground: 0.95 0 0;
+    --card: 0.15 0.01 250;
+    --card-foreground: 0.95 0 0;
+    --popover: 0.18 0.01 250;
+    --popover-foreground: 0.95 0 0;
+    --primary: 0.58 0.18 240;
+    --primary-foreground: 0.98 0 0;
+    --secondary: 0.68 0.14 240;
+    --secondary-foreground: 0.98 0 0;
+    --muted: 0.2 0.01 250;
+    --muted-foreground: 0.65 0.01 240;
+    --accent: 0.22 0.01 250;
+    --accent-foreground: 0.95 0 0;
+    --destructive: 0.52 0.22 25;
+    --destructive-foreground: 0.98 0 0;
+    --border: 0.28 0.01 250;
+    --input: 0.28 0.01 250;
+    --ring: 0.58 0.18 240;
+    --chart-1: 0.58 0.18 240;
+    --chart-2: 0.68 0.14 200;
+    --chart-3: 0.48 0.12 260;
+    --chart-4: 0.78 0.12 180;
+    --chart-5: 0.62 0.18 220;
+    --sidebar: 0.12 0.01 250;
+    --sidebar-foreground: 0.95 0 0;
+    --sidebar-primary: 0.58 0.18 240;
+    --sidebar-primary-foreground: 0.98 0 0;
+    --sidebar-accent: 0.2 0.01 250;
+    --sidebar-accent-foreground: 0.95 0 0;
+    --sidebar-border: 0.25 0.01 250;
+    --sidebar-ring: 0.58 0.18 240;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-headline;
+  }
+}
+
+@layer utilities {
+  .ticker-scroll {
+    animation: ticker-scroll 40s linear infinite;
+    white-space: nowrap;
+  }
+}
