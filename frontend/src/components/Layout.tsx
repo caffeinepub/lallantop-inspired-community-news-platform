@@ -9,6 +9,7 @@ import LoginButton from './LoginButton';
 import LanguageToggle from './LanguageToggle';
 import ProfileSetupModal from './ProfileSetupModal';
 import PrincipalIdDisplay from './PrincipalIdDisplay';
+import PWAInstallPrompt from './PWAInstallPrompt';
 import { Menu, X, Heart, LayoutDashboard } from 'lucide-react';
 
 const NAV_CATEGORIES = [
@@ -317,6 +318,9 @@ export default function Layout() {
           </div>
         </div>
       </footer>
+
+      {/* PWA Install Prompt — fixed bottom banner */}
+      <PWAInstallPrompt />
     </div>
   );
 }

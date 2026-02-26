@@ -1,123 +1,37 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T10:41:00.503Z",
-  "summary": "The diff implements most of the required features for the admin-assigned auto-ID role system and unified role-adaptive dashboard. However, several important details deviate from the spec: the UserRole variant uses #admin/#user/#guest instead of the required #admin/#writer/#editor/#publisher; the role-specific counters are missing (a single counter is used instead of per-role counters); after-login redirect to /dashboard is not clearly implemented; Writer/Editor and Publisher dashboard views are not clearly present; and some translation keys appear missing or mismatched.",
+  "generatedAt": "2026-02-26T10:52:57.124Z",
+  "summary": "The diff implements most PWA conversion requirements: manifest.json, sw.js, index.html PWA meta tags, PWAInstallPrompt component, and Layout integration are all present. However, the two required PNG icon files (icon-192x192.png and icon-512x512.png) are not included in the diff, and the install prompt banner is missing the 'Add to Home Screen' button in the top nav area as specified in REQ-37.",
   "missing_requirements": [
     {
-      "id": "REQ-26",
-      "requirement": "UserRole variant must include #admin, #writer, #editor, #publisher values",
-      "reason": "The diff shows UserRole with #admin, #user, #guest in both backend/main.mo and frontend components. The required roles #writer, #editor, #publisher are never present.",
+      "id": "REQ-36",
+      "requirement": "Place the two generated PWA app icon PNG files as static assets at frontend/public/assets/icons/icon-192x192.png and frontend/public/assets/icons/icon-512x512.png.",
+      "reason": "No PNG icon files appear in the diff's added or modified files. The paths are referenced in manifest.json and index.html but the actual binary image files are not present in the diff.",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/UserManagement.tsx",
-        "frontend/src/pages/DashboardPage.tsx",
+        "frontend/public/manifest.json",
+        "frontend/index.html"
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "requirement": "Also show a small 'Add to Home Screen' button in the top nav area visible on mobile.",
+      "reason": "The PWAInstallPrompt component only implements the bottom banner. There is no evidence of an 'Add to Home Screen' button added to the top nav area in Layout.tsx or any nav component.",
+      "evidence": [
+        "frontend/src/components/PWAInstallPrompt.tsx",
         "frontend/src/components/Layout.tsx"
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "requirement": "Auto-ID counter must be per role type (separate counters for writer, editor, publisher, admin)",
-      "reason": "The diff shows a single userRegistryCounter variable rather than per-role counters as required for generating role_NNN formatted IDs.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "requirement": "Auto-ID counters must use stable variables so they survive canister upgrades",
-      "reason": "The diff declares userRegistryCounter as var (not stable var), and the migration module resets it to 0. There is no evidence of stable variable declaration for counters in the truncated main.mo.",
-      "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "requirement": "After login the user is routed to /dashboard",
-      "reason": "No redirect-to-/dashboard logic after successful login is visible in the diff. Layout.tsx and LoginButton.tsx changes do not include post-login navigation to /dashboard.",
-      "evidence": [
-        "frontend/src/components/Layout.tsx"
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "requirement": "Writer/Editor view — panel to create and manage the user's own submitted articles",
-      "reason": "DashboardPage.tsx role checks reference UserRole.user and UserRole.guest rather than UserRole.writer/UserRole.editor. No dedicated Writer/Editor panel is visible in the truncated file.",
-      "evidence": [
-        "frontend/src/pages/DashboardPage.tsx"
-      ]
-    },
-    {
-      "id": "REQ-28",
-      "requirement": "Publisher view — panel to review pending articles and approve/publish them",
-      "reason": "DashboardPage.tsx role checks use UserRole.user and UserRole.guest, not UserRole.publisher. No publisher-specific panel is visible.",
-      "evidence": [
-        "frontend/src/pages/DashboardPage.tsx"
-      ]
-    },
-    {
-      "id": "REQ-29",
-      "requirement": "Role selector dropdown must include Writer, Editor, Publisher, Admin options",
-      "reason": "UserManagement.tsx role handling only covers UserRole.admin, UserRole.user, UserRole.guest — not the required Writer/Editor/Publisher roles.",
-      "evidence": [
-        "frontend/src/components/UserManagement.tsx"
-      ]
-    },
-    {
-      "id": "REQ-30",
-      "requirement": "Color-coded role badge: Admin=dark blue, Editor=green, Writer=teal, Publisher=orange",
-      "reason": "Layout.tsx RoleBadgeNav only defines styles for admin/user/guest roles, not the required writer/editor/publisher roles with specified colors.",
-      "evidence": [
-        "frontend/src/components/Layout.tsx"
-      ]
-    },
-    {
-      "id": "REQ-32",
-      "requirement": "roleBadge labels for admin/writer/editor/publisher in translations",
-      "reason": "Translations reference user/guest roles rather than the required writer/editor/publisher roles. The roleBadge keys for writer, editor, publisher cannot be confirmed present with the correct role names.",
-      "evidence": [
-        "frontend/src/constants/translations.ts"
       ]
     }
   ],
-  "hallucinated_features": [
-    {
-      "description": "UserRole variant includes #user and #guest values not requested in the spec",
-      "reason": "The spec requires #admin, #writer, #editor, #publisher. The implementation adds #user and #guest which were not requested.",
-      "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/UserManagement.tsx",
-        "frontend/src/pages/DashboardPage.tsx",
-        "frontend/src/components/Layout.tsx"
-      ]
-    },
-    {
-      "description": "backend/migration.mo module added with a migration runner",
-      "reason": "The spec does not request a separate migration.mo file; it only requires stable variables for counters. The migration module is an extra architectural addition not requested.",
-      "evidence": [
-        "backend/migration.mo"
-      ]
-    },
-    {
-      "description": "UserManagement extracted into a separate component file frontend/src/components/UserManagement.tsx",
-      "reason": "REQ-29 specifies building the User Management tab inside DashboardPage.tsx. Extracting it to a separate named component file was not explicitly requested.",
-      "evidence": [
-        "frontend/src/components/UserManagement.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.72,
+  "hallucinated_features": [],
+  "confidence": 0.88,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
+    "frontend/index.html",
+    "frontend/public/manifest.json",
+    "frontend/public/sw.js",
     "frontend/src/components/Layout.tsx",
-    "frontend/src/components/UserManagement.tsx",
-    "frontend/src/constants/translations.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/components/PWAInstallPrompt.tsx",
     "project_state.json"
   ]
 }

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-userolesystem-hook-or-extend-usequeries-ts-with-react-query-hooks-that-call-the-new-backend-functions-usemyprofile-calls-getmyprofile-useuserregistry-calls-getuserregistry-admin-only-useassignrolewithautoid-mutation-calling-assignrolewithautoid-principal-role-userevokerole-mutation-calling-revokerole-principal-all-queries-should-invalidate-appropriately-on-mutation-success",
-      "featureTitle": "Add a useRoleSystem hook (or extend useQueries.ts) with React Query hooks that call the new backend functions: useMyProfile() — calls getMyProfile(), useUserRegistry() — calls getUserRegistry() (admin only), useAssignRoleWithAutoId() — mutation calling assignRoleWithAutoId(principal, role), useRevokeRole() — mutation calling revokeRole(principal). All queries should invalidate appropriately on mutation success.",
+      "featureId": "feature-create-a-frontend-public-manifest-json-file-with-the-following-pwa-configuration-name-set-to-global-nexus-short-name-set-to-global-nexus-description-set-to-multilingual-community-driven-news-platform-start-url-set-to-display-set-to-standalone-orientation-set-to-portrait-theme-color-set-to-1a6fbf-background-color-set-to-1a1a1a-icons-array-referencing-the-generated-192-192-icon-at-assets-icons-icon-192x192-png-and-the-512-512-icon-at-assets-icons-icon-512x512-png-with-type-image-png-and-purpose-any-maskable",
+      "featureTitle": "Create a `frontend/public/manifest.json` file with the following PWA configuration: name set to 'Global Nexus', short_name set to 'Global Nexus', description set to 'Multilingual community-driven news platform', start_url set to '/', display set to 'standalone', orientation set to 'portrait', theme_color set to '#1A6FBF', background_color set to '#1a1a1a', icons array referencing the generated 192×192 icon at '/assets/icons/icon-192x192.png' and the 512×512 icon at '/assets/icons/icon-512x512.png' with type 'image/png' and purpose 'any maskable'.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/public/manifest.json"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,16 +16,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-27"
+        "REQ-33"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-create-a-new-frontend-src-pages-dashboardpage-tsx-at-route-dashboard-after-login-the-user-is-routed-to-dashboard-the-page-reads-the-logged-in-user-s-profile-via-usemyprofile-it-renders-four-distinct-views-based-on-the-user-s-assigned-role-1-admin-view-tabbed-panel-with-user-management-article-management-and-citizen-post-moderation-tabs-2-writer-editor-view-panel-to-create-and-manage-the-user-s-own-submitted-articles-list-own-articles-create-new-article-form-3-publisher-view-panel-to-review-pending-articles-and-approve-publish-them-4-unassigned-view-a-centered-message-reading-you-have-not-been-assigned-a-role-yet-please-contact-the-admin-with-the-user-s-copyable-principal-id-shown-unauthenticated-users-visiting-dashboard-are-redirected-to-the-homepage-register-the-dashboard-route-in-app-tsx",
-      "featureTitle": "Create a new frontend/src/pages/DashboardPage.tsx at route /dashboard. After login the user is routed to /dashboard. The page reads the logged-in user's profile via useMyProfile(). It renders four distinct views based on the user's assigned role: (1) Admin view — tabbed panel with 'User Management', 'Article Management', and 'Citizen Post Moderation' tabs; (2) Writer/Editor view — panel to create and manage the user's own submitted articles (list own articles, create new article form); (3) Publisher view — panel to review pending articles and approve/publish them; (4) Unassigned view — a centered message reading 'You have not been assigned a role yet. Please contact the admin.' with the user's copyable Principal ID shown. Unauthenticated users visiting /dashboard are redirected to the homepage. Register the /dashboard route in App.tsx.",
+      "featureId": "feature-update-frontend-index-html-to-add-all-required-pwa-meta-tags-1-link-rel-manifest-href-manifest-json-2-meta-name-theme-color-content-1a6fbf-3-meta-name-mobile-web-app-capable-content-yes-4-meta-name-apple-mobile-web-app-capable-content-yes-5-meta-name-apple-mobile-web-app-status-bar-style-content-default-6-meta-name-apple-mobile-web-app-title-content-global-nexus-7-link-rel-apple-touch-icon-href-assets-icons-icon-192x192-png-8-meta-name-msapplication-tilecolor-content-1a6fbf-9-meta-name-msapplication-tileimage-content-assets-icons-icon-192x192-png-ensure-the-existing-title-tag-global-nexus-and-favicon-link-remain-unchanged",
+      "featureTitle": "Update `frontend/index.html` to add all required PWA meta tags: (1) `<link rel='manifest' href='/manifest.json'>`, (2) `<meta name='theme-color' content='#1A6FBF'>`, (3) `<meta name='mobile-web-app-capable' content='yes'>`, (4) `<meta name='apple-mobile-web-app-capable' content='yes'>`, (5) `<meta name='apple-mobile-web-app-status-bar-style' content='default'>`, (6) `<meta name='apple-mobile-web-app-title' content='Global Nexus'>`, (7) `<link rel='apple-touch-icon' href='/assets/icons/icon-192x192.png'>`, (8) `<meta name='msapplication-TileColor' content='#1A6FBF'>`, (9) `<meta name='msapplication-TileImage' content='/assets/icons/icon-192x192.png'>`. Ensure the existing title tag 'Global Nexus' and favicon link remain unchanged.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/pages/DashboardPage.tsx"
+        "frontend/index.html"
       ],
       "components": [
         "authorization@4.0.0",
@@ -36,16 +35,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-28"
+        "REQ-34"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-the-user-management-tab-inside-dashboardpage-tsx-visible-to-admin-role-only-this-tab-contains-1-an-assign-role-form-with-two-inputs-a-principal-id-text-field-and-a-role-selector-dropdown-options-writer-editor-publisher-admin-plus-an-assign-button-that-calls-useassignrolewithautoid-on-success-display-the-generated-auto-id-in-a-success-banner-e-g-assigned-id-writer-003-2-a-full-user-registry-table-listing-all-assigned-users-with-columns-auto-generated-id-role-badge-principal-id-truncated-with-copy-button-and-a-revoke-action-button-that-calls-userevokerole-the-table-must-show-an-empty-state-message-if-no-users-are-assigned",
-      "featureTitle": "Build the User Management tab inside DashboardPage.tsx (visible to Admin role only). This tab contains: (1) An 'Assign Role' form with two inputs — a Principal ID text field and a role selector dropdown (options: Writer, Editor, Publisher, Admin) — plus an 'Assign' button that calls useAssignRoleWithAutoId. On success, display the generated auto-ID in a success banner (e.g. 'Assigned! ID: writer_003'). (2) A full User Registry table listing all assigned users with columns: Auto-Generated ID, Role badge, Principal ID (truncated, with copy button), and a 'Revoke' action button that calls useRevokeRole. The table must show an empty state message if no users are assigned.",
+      "featureId": "feature-create-a-service-worker-file-at-frontend-public-sw-js-that-implements-a-cache-first-strategy-for-the-app-shell-and-static-assets-and-a-network-first-strategy-for-api-calls-to-the-icp-backend-the-service-worker-must-1-cache-all-static-assets-html-css-js-images-fonts-on-install-using-a-cache-named-global-nexus-v1-2-serve-cached-assets-when-offline-3-use-network-first-for-any-fetch-requests-to-api-or-icp-canister-urls-so-fresh-content-is-always-attempted-first-4-include-an-activate-handler-that-clears-old-cache-versions-register-the-service-worker-in-frontend-index-html-via-an-inline-script-that-calls-navigator-serviceworker-register-sw-js-only-if-serviceworker-in-navigator",
+      "featureTitle": "Create a service worker file at `frontend/public/sw.js` that implements a cache-first strategy for the app shell and static assets, and a network-first strategy for API calls to the ICP backend. The service worker must: (1) cache all static assets (HTML, CSS, JS, images, fonts) on install using a cache named 'global-nexus-v1', (2) serve cached assets when offline, (3) use network-first for any fetch requests to '/api' or ICP canister URLs so fresh content is always attempted first, (4) include an activate handler that clears old cache versions. Register the service worker in `frontend/index.html` via an inline script that calls `navigator.serviceWorker.register('/sw.js')` only if `'serviceWorker' in navigator`.",
       "files": [
-        "frontend/src/components/UserManagement.tsx",
-        "frontend/src/pages/DashboardPage.tsx"
+        "frontend/index.html",
+        "frontend/public/sw.js"
       ],
       "components": [
         "authorization@4.0.0",
@@ -56,15 +55,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-29"
+        "REQ-35"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-layout-nav-component-frontend-src-components-layout-tsx-so-that-after-a-user-logs-in-via-internet-identity-1-the-nav-displays-the-user-s-auto-generated-id-from-usemyprofile-as-a-styled-label-e-g-writer-001-2-a-role-badge-is-shown-next-to-the-id-using-a-color-coded-chip-admin-dark-blue-editor-green-writer-teal-publisher-orange-3-the-existing-copyable-principal-id-display-principaliddisplay-component-remains-visible-4-a-dashboard-link-appears-in-the-nav-pointing-to-dashboard-5-if-the-user-has-no-assigned-role-usemyprofile-returns-null-no-id-or-role-badge-is-shown-only-the-principal-id-and-dashboard-link-all-of-this-is-only-visible-when-authenticated",
-      "featureTitle": "Update the Layout nav component (frontend/src/components/Layout.tsx) so that after a user logs in via Internet Identity: (1) The nav displays the user's auto-generated ID (from useMyProfile) as a styled label — e.g. 'writer_001'; (2) A role badge is shown next to the ID using a color-coded chip (Admin = dark blue, Editor = green, Writer = teal, Publisher = orange); (3) The existing copyable Principal ID display (PrincipalIdDisplay component) remains visible; (4) A 'Dashboard' link appears in the nav pointing to /dashboard; (5) If the user has no assigned role (useMyProfile returns null), no ID or role badge is shown — only the Principal ID and Dashboard link. All of this is only visible when authenticated.",
+      "featureId": "feature-add-an-in-app-pwa-install-prompt-banner-to-the-frontend-listen-for-the-beforeinstallprompt-browser-event-stash-the-event-and-display-a-dismissible-banner-at-the-bottom-of-the-screen-fixed-position-z-index-above-content-with-the-global-nexus-blue-1a6fbf-background-white-text-reading-install-global-nexus-get-the-full-app-experience-on-your-home-screen-and-an-install-button-that-calls-prompt-on-the-stashed-event-also-show-a-small-add-to-home-screen-button-in-the-top-nav-area-visible-on-mobile-once-installed-or-dismissed-hide-the-banner-and-store-the-dismissed-state-in-localstorage-so-it-does-not-reappear-the-prompt-must-not-appear-on-desktop-browsers-where-pwa-install-is-not-applicable",
+      "featureTitle": "Add an in-app PWA install prompt banner to the frontend. Listen for the `beforeinstallprompt` browser event, stash the event, and display a dismissible banner at the bottom of the screen (fixed position, z-index above content) with the Global Nexus blue (#1A6FBF) background, white text reading 'Install Global Nexus — get the full app experience on your home screen', and an 'Install' button that calls `prompt()` on the stashed event. Also show a small 'Add to Home Screen' button in the top nav area visible on mobile. Once installed or dismissed, hide the banner and store the dismissed state in localStorage so it does not reappear. The prompt must not appear on desktop browsers where PWA install is not applicable.",
       "files": [
-        "frontend/src/components/Layout.tsx"
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/components/PWAInstallPrompt.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -75,45 +75,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-30"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-in-the-existing-admindashboardpage-tsx-migrate-the-article-management-and-citizen-post-moderation-panels-so-they-are-also-rendered-inside-the-new-dashboardpage-tsx-admin-view-tabs-article-management-tab-and-citizen-post-moderation-tab-the-existing-admin-route-and-admindashboardpage-tsx-must-remain-functional-for-backward-compatibility-it-may-re-use-or-import-the-same-articlemanagement-and-citizenpostmoderation-components-ensure-no-duplication-of-logic-both-pages-should-use-the-same-shared-components",
-      "featureTitle": "In the existing AdminDashboardPage.tsx, migrate the Article Management and Citizen Post Moderation panels so they are also rendered inside the new DashboardPage.tsx Admin view tabs (Article Management tab and Citizen Post Moderation tab). The existing /admin route and AdminDashboardPage.tsx must remain functional for backward compatibility — it may re-use or import the same ArticleManagement and CitizenPostModeration components. Ensure no duplication of logic; both pages should use the same shared components.",
-      "files": [
-        "frontend/src/pages/DashboardPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-31"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-english-and-hindi-translation-strings-to-frontend-src-constants-translations-ts-for-all-new-ui-strings-introduced-by-the-dashboard-and-role-system-required-keys-include-dashboard-dashboard-usermanagement-user-management-assignrole-assign-role-roleregistry-role-registry-autogeneratedid-auto-generated-id-revokerole-revoke-rolebadge-labels-for-admin-writer-editor-publisher-noroleassigned-you-have-not-been-assigned-a-role-yet-please-contact-the-admin-assignsuccess-assigned-id-id-and-any-form-labels-and-button-text-all-new-static-ui-strings-in-dashboardpage-tsx-and-the-nav-additions-must-reference-these-translation-keys-via-the-existing-usetranslation-hook",
-      "featureTitle": "Add English and Hindi translation strings to frontend/src/constants/translations.ts for all new UI strings introduced by the dashboard and role system. Required keys include: dashboard (Dashboard), userManagement (User Management), assignRole (Assign Role), roleRegistry (Role Registry), autoGeneratedId (Auto-Generated ID), revokeRole (Revoke), roleBadge labels for admin/writer/editor/publisher, noRoleAssigned (You have not been assigned a role yet. Please contact the admin.), assignSuccess (Assigned! ID: {id}), and any form labels and button text. All new static UI strings in DashboardPage.tsx and the nav additions must reference these translation keys via the existing useTranslation hook.",
-      "files": [
-        "frontend/src/constants/translations.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-32"
+        "REQ-37"
       ],
       "confidence": "high"
     }

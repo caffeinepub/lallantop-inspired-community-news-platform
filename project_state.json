@@ -1,18 +1,20 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "Multilingual community-driven news platform rebranded to 'Global Nexus', founded by Pawnesh Kumar Singh. Features include a dense multi-column homepage with horizontal top nav, breaking news ticker, Hindi/English manual language toggle, citizen journalism public page, community comments, personalized feeds, multimedia section (YouTube embeds, podcast links, short-form content), and admin/editor accounts for official publishing. Platform color scheme updated to blue (#1A6FBF), black (#1a1a1a), and white. Logo replaced with uploaded Global Nexus logo. About/Founder page added in the footer featuring Pawnesh Kumar Singh's bio and photo. Privacy Policy (/privacy) and Terms of Service (/terms) pages added with full legal text, styled in blue/black theme, linked from footer alongside About link. Backend seed data updated with 2–4 new articles per category and new multimedia items. Role-based auth system being added: Admin assigns roles (Admin, Writer, Editor, Publisher) to Principal IDs via the Admin Dashboard; the system auto-generates a unique custom ID for each assigned user. Single unified /dashboard route adapts its content based on the logged-in user's assigned role. Nav shows auto-generated ID, role badge, and copyable Principal ID after login.",
+  "projectStateVersion": 17,
+  "summary": "Multilingual community-driven news platform rebranded to 'Global Nexus', founded by Pawnesh Kumar Singh. Features include a dense multi-column homepage with horizontal top nav, breaking news ticker, Hindi/English manual language toggle, citizen journalism public page, community comments, personalized feeds, multimedia section (YouTube embeds, podcast links, short-form content), and admin/editor accounts for official publishing. Platform color scheme updated to blue (#1A6FBF), black (#1a1a1a), and white. Logo replaced with uploaded Global Nexus logo. About/Founder page added in the footer featuring Pawnesh Kumar Singh's bio and photo. Privacy Policy (/privacy) and Terms of Service (/terms) pages added with full legal text, styled in blue/black theme, linked from footer alongside About link. Backend seed data updated with 2–4 new articles per category and new multimedia items. Role-based auth system being added: Admin assigns roles (Admin, Writer, Editor, Publisher) to Principal IDs via the Admin Dashboard; the system auto-generates a unique custom ID for each assigned user. Single unified /dashboard route adapts its content based on the logged-in user's assigned role. Nav shows auto-generated ID, role badge, and copyable Principal ID after login. PWA conversion in progress: manifest.json, service worker, PWA meta tags, app icons, and install prompt support being added to make the platform installable on Android/iOS home screens with full offline caching.",
   "architectural_notes": [
     "AI-generated news uses rich placeholder/mock content — architecture is ready to plug in live AI/translation APIs later",
     "No real-time WebSockets; breaking news ticker and comments use refresh-based updates",
     "Multimedia section uses embedded external content (YouTube, podcast links) rather than direct file uploads",
     "Platform logo uses user-uploaded logo.png (Global Nexus branding) rather than a generated image",
-    "Role system is admin-assigned only (no self-registration); backend stores Principal → { autoId: Text, role: Role } with auto-generated IDs like writer_001"
+    "Role system is admin-assigned only (no self-registration); backend stores Principal → { autoId: Text, role: Role } with auto-generated IDs like writer_001",
+    "PWA layer adds manifest.json + service worker for offline caching and home screen installability on Android/iOS; all existing features remain server-driven and online-first"
   ],
   "known_issues": [
     "Article not visible in a section of the homepage/category pages — user reports article missing from what appears to be an empty/void section"
   ],
   "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Square app icon with Global Nexus blue globe logo centered on a dark charcoal (#1a1a1a) background, bold white 'GN' monogram overlay, clean and minimal (icon-192x192.dim_192x192.png)\n- Square app icon with Global Nexus blue globe logo centered on a dark charcoal (#1a1a1a) background, bold white 'GN' monogram overlay, clean and minimal, high resolution (icon-512x512.dim_512x512.png)",
   "existing_features": [
     {
       "id": "feature-build-the-top-level-app-layout-with-a-full-width-horizontal-top-navigation-bar-styled-after-lallantop-times-of-india-the-nav-must-include-platform-logo-name-on-the-left-category-links-home-india-world-sports-entertainment-technology-business-citizen-reports-multimedia-a-hindi-english-language-toggle-button-and-an-internet-identity-login-logout-button-below-the-nav-render-a-breaking-news-scrolling-ticker-showing-the-latest-breaking-articles-the-layout-must-be-dense-and-content-rich-using-a-dark-red-saffron-and-white-color-scheme-inspired-by-indian-news-portals",
@@ -221,6 +223,38 @@
         "REQ-32"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-create-a-frontend-public-manifest-json-file-with-the-following-pwa-configuration-name-set-to-global-nexus-short-name-set-to-global-nexus-description-set-to-multilingual-community-driven-news-platform-start-url-set-to-display-set-to-standalone-orientation-set-to-portrait-theme-color-set-to-1a6fbf-background-color-set-to-1a1a1a-icons-array-referencing-the-generated-192-192-icon-at-assets-icons-icon-192x192-png-and-the-512-512-icon-at-assets-icons-icon-512x512-png-with-type-image-png-and-purpose-any-maskable",
+      "title": "Create a `frontend/public/manifest.json` file with the following PWA configuration: name set to 'Global Nexus', short_name set to 'Global Nexus', description set to 'Multilingual community-driven news platform', start_url set to '/', display set to 'standalone', orientation set to 'portrait', theme_color set to '#1A6FBF', background_color set to '#1a1a1a', icons array referencing the generated 192×192 icon at '/assets/icons/icon-192x192.png' and the 512×512 icon at '/assets/icons/icon-512x512.png' with type 'image/png' and purpose 'any maskable'.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-index-html-to-add-all-required-pwa-meta-tags-1-link-rel-manifest-href-manifest-json-2-meta-name-theme-color-content-1a6fbf-3-meta-name-mobile-web-app-capable-content-yes-4-meta-name-apple-mobile-web-app-capable-content-yes-5-meta-name-apple-mobile-web-app-status-bar-style-content-default-6-meta-name-apple-mobile-web-app-title-content-global-nexus-7-link-rel-apple-touch-icon-href-assets-icons-icon-192x192-png-8-meta-name-msapplication-tilecolor-content-1a6fbf-9-meta-name-msapplication-tileimage-content-assets-icons-icon-192x192-png-ensure-the-existing-title-tag-global-nexus-and-favicon-link-remain-unchanged",
+      "title": "Update `frontend/index.html` to add all required PWA meta tags: (1) `<link rel='manifest' href='/manifest.json'>`, (2) `<meta name='theme-color' content='#1A6FBF'>`, (3) `<meta name='mobile-web-app-capable' content='yes'>`, (4) `<meta name='apple-mobile-web-app-capable' content='yes'>`, (5) `<meta name='apple-mobile-web-app-status-bar-style' content='default'>`, (6) `<meta name='apple-mobile-web-app-title' content='Global Nexus'>`, (7) `<link rel='apple-touch-icon' href='/assets/icons/icon-192x192.png'>`, (8) `<meta name='msapplication-TileColor' content='#1A6FBF'>`, (9) `<meta name='msapplication-TileImage' content='/assets/icons/icon-192x192.png'>`. Ensure the existing title tag 'Global Nexus' and favicon link remain unchanged.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-service-worker-file-at-frontend-public-sw-js-that-implements-a-cache-first-strategy-for-the-app-shell-and-static-assets-and-a-network-first-strategy-for-api-calls-to-the-icp-backend-the-service-worker-must-1-cache-all-static-assets-html-css-js-images-fonts-on-install-using-a-cache-named-global-nexus-v1-2-serve-cached-assets-when-offline-3-use-network-first-for-any-fetch-requests-to-api-or-icp-canister-urls-so-fresh-content-is-always-attempted-first-4-include-an-activate-handler-that-clears-old-cache-versions-register-the-service-worker-in-frontend-index-html-via-an-inline-script-that-calls-navigator-serviceworker-register-sw-js-only-if-serviceworker-in-navigator",
+      "title": "Create a service worker file at `frontend/public/sw.js` that implements a cache-first strategy for the app shell and static assets, and a network-first strategy for API calls to the ICP backend. The service worker must: (1) cache all static assets (HTML, CSS, JS, images, fonts) on install using a cache named 'global-nexus-v1', (2) serve cached assets when offline, (3) use network-first for any fetch requests to '/api' or ICP canister URLs so fresh content is always attempted first, (4) include an activate handler that clears old cache versions. Register the service worker in `frontend/index.html` via an inline script that calls `navigator.serviceWorker.register('/sw.js')` only if `'serviceWorker' in navigator`.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-in-app-pwa-install-prompt-banner-to-the-frontend-listen-for-the-beforeinstallprompt-browser-event-stash-the-event-and-display-a-dismissible-banner-at-the-bottom-of-the-screen-fixed-position-z-index-above-content-with-the-global-nexus-blue-1a6fbf-background-white-text-reading-install-global-nexus-get-the-full-app-experience-on-your-home-screen-and-an-install-button-that-calls-prompt-on-the-stashed-event-also-show-a-small-add-to-home-screen-button-in-the-top-nav-area-visible-on-mobile-once-installed-or-dismissed-hide-the-banner-and-store-the-dismissed-state-in-localstorage-so-it-does-not-reappear-the-prompt-must-not-appear-on-desktop-browsers-where-pwa-install-is-not-applicable",
+      "title": "Add an in-app PWA install prompt banner to the frontend. Listen for the `beforeinstallprompt` browser event, stash the event, and display a dismissible banner at the bottom of the screen (fixed position, z-index above content) with the Global Nexus blue (#1A6FBF) background, white text reading 'Install Global Nexus — get the full app experience on your home screen', and an 'Install' button that calls `prompt()` on the stashed event. Also show a small 'Add to Home Screen' button in the top nav area visible on mobile. Once installed or dismissed, hide the banner and store the dismissed state in localStorage so it does not reappear. The prompt must not appear on desktop browsers where PWA install is not applicable.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -383,6 +417,20 @@
       "summary": "Extend the Motoko backend actor in backend/main.mo to support an admin-assigned role system. Add a stable HashMap storing Principal → { autoId: Text, role: UserRole } where UserRole is a variant type with values #admin, #writer, #editor, #publisher. Add the following functions: (1) assignRoleWithAutoId(principal: Principal, role: UserRole): async Text — admin-only, auto-generates a unique ID in the format role_NNN (e.g. writer_001, publisher_003) using a monotonically incrementing counter per role type, stores the mapping, and returns the generated ID; (2) getMyProfile(): async ?{ autoId: Text; role: UserRole } — returns the calling principal's assigned profile or null if unassigned; (3) revokeRole(principal: Principal): async () — admin-only, removes the principal's entry from the registry; (4) getUserRegistry(): async [{ principal: Principal; autoId: Text; role: UserRole }] — admin-only, returns all assigned users. The auto-ID counter must be stable (persists across upgrades). Ensure the existing assignRole and isAdmin/isEditor helper functions remain intact and continue to work.",
       "reqIds": [
         "REQ-26"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Convert Global Nexus to a Progressive Web App (PWA): add manifest.json with branding (name, theme color #1A6FBF, background #1a1a1a, standalone display), service worker for offline caching, PWA meta tags in index.html, app icons in standard sizes (192×192, 512×512), and install prompt support for Android/iOS home screen installation. All existing features remain intact.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Place the two generated PWA app icon PNG files as static assets at `frontend/public/assets/icons/icon-192x192.png` and `frontend/public/assets/icons/icon-512x512.png`. These paths must exactly match the icon references in manifest.json and the apple-touch-icon meta tag in index.html.",
+      "reqIds": [
+        "REQ-36"
       ],
       "status": "pending"
     }

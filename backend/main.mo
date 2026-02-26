@@ -3,14 +3,14 @@ import Iter "mo:core/Iter";
 import Text "mo:core/Text";
 import List "mo:core/List";
 import Principal "mo:core/Principal";
-import Migration "migration";
+
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
 // Apply migration on upgrade
-(with migration = Migration.run)
+
 actor {
   type UniqueId = Nat;
   type Timestamp = Time.Time;

@@ -1,173 +1,137 @@
 {
   "kind": "build_request",
-  "title": "Admin-Assigned Auto-ID Role System with Unified Role-Adaptive Dashboard",
+  "title": "Convert Global Nexus to a Progressive Web App (PWA)",
   "projectName": "Global Nexus",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-26",
-      "text": "Extend the Motoko backend actor in backend/main.mo to support an admin-assigned role system. Add a stable HashMap storing Principal → { autoId: Text, role: UserRole } where UserRole is a variant type with values #admin, #writer, #editor, #publisher. Add the following functions: (1) assignRoleWithAutoId(principal: Principal, role: UserRole): async Text — admin-only, auto-generates a unique ID in the format role_NNN (e.g. writer_001, publisher_003) using a monotonically incrementing counter per role type, stores the mapping, and returns the generated ID; (2) getMyProfile(): async ?{ autoId: Text; role: UserRole } — returns the calling principal's assigned profile or null if unassigned; (3) revokeRole(principal: Principal): async () — admin-only, removes the principal's entry from the registry; (4) getUserRegistry(): async [{ principal: Principal; autoId: Text; role: UserRole }] — admin-only, returns all assigned users. The auto-ID counter must be stable (persists across upgrades). Ensure the existing assignRole and isAdmin/isEditor helper functions remain intact and continue to work.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-recent"
-        ],
-        "quotes": [
-          "The ID admin creates should be auto-generated and the system when the admin assigns the role principle.",
-          "assignRoleWithAutoId(principal, role) — admin-only, generates and stores the ID + role mapping",
-          "getMyProfile() — returns the logged-in user's auto-generated ID and role"
-        ]
-      },
-      "acceptanceCriteria": [
-        "assignRoleWithAutoId called with a principal and #writer role stores the mapping and returns an ID like 'writer_001'",
-        "A second writer assignment returns 'writer_002' (counter increments per role type)",
-        "getMyProfile called by an assigned principal returns { autoId, role }; called by an unassigned principal returns null",
-        "revokeRole removes the user's mapping; getMyProfile for that principal returns null afterward",
-        "getUserRegistry returns all assigned users and is only callable by an admin principal",
-        "assignRoleWithAutoId is rejected with an error for non-admin callers",
-        "Auto-ID counters survive canister upgrades (stable variable)"
-      ]
-    },
-    {
-      "id": "REQ-27",
-      "text": "Add a useRoleSystem hook (or extend useQueries.ts) with React Query hooks that call the new backend functions: useMyProfile() — calls getMyProfile(), useUserRegistry() — calls getUserRegistry() (admin only), useAssignRoleWithAutoId() — mutation calling assignRoleWithAutoId(principal, role), useRevokeRole() — mutation calling revokeRole(principal). All queries should invalidate appropriately on mutation success.",
+      "id": "REQ-33",
+      "text": "Create a `frontend/public/manifest.json` file with the following PWA configuration: name set to 'Global Nexus', short_name set to 'Global Nexus', description set to 'Multilingual community-driven news platform', start_url set to '/', display set to 'standalone', orientation set to 'portrait', theme_color set to '#1A6FBF', background_color set to '#1a1a1a', icons array referencing the generated 192×192 icon at '/assets/icons/icon-192x192.png' and the 512×512 icon at '/assets/icons/icon-512x512.png' with type 'image/png' and purpose 'any maskable'.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-recent-4",
+          "msg-recent-5"
         ],
         "quotes": [
-          "go ahed"
+          "A manifest.json with Global Nexus branding (name, short_name, theme color #1A6FBF, background color #1a1a1a, standalone display mode)",
+          "manifest.json with Global Nexus branding (name, theme color #1A6FBF, background #1a1a1a, standalone display)"
         ]
       },
       "acceptanceCriteria": [
-        "useMyProfile returns the logged-in user's { autoId, role } or null when unassigned",
-        "useAssignRoleWithAutoId mutation triggers a getUserRegistry and useMyProfile cache invalidation on success",
-        "useRevokeRole mutation invalidates the user registry cache on success",
-        "All hooks are exported from a single file consistent with the existing useQueries.ts pattern"
+        "frontend/public/manifest.json exists and is valid JSON",
+        "name field is 'Global Nexus' and short_name is 'Global Nexus'",
+        "display is 'standalone', theme_color is '#1A6FBF', background_color is '#1a1a1a'",
+        "icons array references both 192×192 and 512×512 PNG icons with correct paths",
+        "Browser DevTools Application > Manifest panel shows no errors"
       ]
     },
     {
-      "id": "REQ-28",
-      "text": "Create a new frontend/src/pages/DashboardPage.tsx at route /dashboard. After login the user is routed to /dashboard. The page reads the logged-in user's profile via useMyProfile(). It renders four distinct views based on the user's assigned role: (1) Admin view — tabbed panel with 'User Management', 'Article Management', and 'Citizen Post Moderation' tabs; (2) Writer/Editor view — panel to create and manage the user's own submitted articles (list own articles, create new article form); (3) Publisher view — panel to review pending articles and approve/publish them; (4) Unassigned view — a centered message reading 'You have not been assigned a role yet. Please contact the admin.' with the user's copyable Principal ID shown. Unauthenticated users visiting /dashboard are redirected to the homepage. Register the /dashboard route in App.tsx.",
+      "id": "REQ-34",
+      "text": "Update `frontend/index.html` to add all required PWA meta tags: (1) `<link rel='manifest' href='/manifest.json'>`, (2) `<meta name='theme-color' content='#1A6FBF'>`, (3) `<meta name='mobile-web-app-capable' content='yes'>`, (4) `<meta name='apple-mobile-web-app-capable' content='yes'>`, (5) `<meta name='apple-mobile-web-app-status-bar-style' content='default'>`, (6) `<meta name='apple-mobile-web-app-title' content='Global Nexus'>`, (7) `<link rel='apple-touch-icon' href='/assets/icons/icon-192x192.png'>`, (8) `<meta name='msapplication-TileColor' content='#1A6FBF'>`, (9) `<meta name='msapplication-TileImage' content='/assets/icons/icon-192x192.png'>`. Ensure the existing title tag 'Global Nexus' and favicon link remain unchanged.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-recent-4",
+          "msg-recent-5"
         ],
         "quotes": [
-          "single unified dashboard that adopts its options based on their assigned roles",
-          "Admin view — User Management (assign roles + Principal IDs, auto-ID generation, full user registry), Article Management, Citizen Post Moderation",
-          "Writer/Editor view — Create and manage own articles and drafts",
-          "Publisher view — Review, approve, and publish content",
-          "Users without an assigned role see a 'You have not been assigned a role yet — please contact the admin' message"
+          "PWA meta tags in index.html (viewport, theme-color, apple-touch-icon, apple-mobile-web-app-capable, ms-application-tile)"
         ]
       },
       "acceptanceCriteria": [
-        "Unauthenticated users are redirected away from /dashboard to the homepage",
-        "Admin-role users see three tabs: User Management, Article Management, Citizen Post Moderation",
-        "Writer/Editor-role users see only a create/manage articles panel",
-        "Publisher-role users see only a review/publish content panel",
-        "Unassigned users see the 'contact admin' message and their copyable Principal ID",
-        "/dashboard route is registered in App.tsx"
+        "index.html contains <link rel='manifest' href='/manifest.json'>",
+        "index.html contains theme-color meta tag with value #1A6FBF",
+        "index.html contains apple-mobile-web-app-capable and apple-touch-icon meta tags",
+        "Existing page title 'Global Nexus' and favicon remain unchanged",
+        "Lighthouse PWA audit shows all installability criteria met"
       ]
     },
     {
-      "id": "REQ-29",
-      "text": "Build the User Management tab inside DashboardPage.tsx (visible to Admin role only). This tab contains: (1) An 'Assign Role' form with two inputs — a Principal ID text field and a role selector dropdown (options: Writer, Editor, Publisher, Admin) — plus an 'Assign' button that calls useAssignRoleWithAutoId. On success, display the generated auto-ID in a success banner (e.g. 'Assigned! ID: writer_003'). (2) A full User Registry table listing all assigned users with columns: Auto-Generated ID, Role badge, Principal ID (truncated, with copy button), and a 'Revoke' action button that calls useRevokeRole. The table must show an empty state message if no users are assigned.",
+      "id": "REQ-35",
+      "text": "Create a service worker file at `frontend/public/sw.js` that implements a cache-first strategy for the app shell and static assets, and a network-first strategy for API calls to the ICP backend. The service worker must: (1) cache all static assets (HTML, CSS, JS, images, fonts) on install using a cache named 'global-nexus-v1', (2) serve cached assets when offline, (3) use network-first for any fetch requests to '/api' or ICP canister URLs so fresh content is always attempted first, (4) include an activate handler that clears old cache versions. Register the service worker in `frontend/index.html` via an inline script that calls `navigator.serviceWorker.register('/sw.js')` only if `'serviceWorker' in navigator`.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-recent-4",
+          "msg-recent-5"
         ],
         "quotes": [
-          "Admin view — User Management (assign role + Principal → auto-generates ID, full user registry with assigned IDs and roles)",
-          "Admin enters a Principal ID and selects a role (Admin, Writer, Editor, Publisher) — the system auto-generates a unique ID"
+          "A service worker for offline caching and installability",
+          "Service worker for offline caching of the app shell and static assets"
         ]
       },
       "acceptanceCriteria": [
-        "Submitting the Assign Role form with a valid Principal and selected role calls the backend and displays the returned auto-ID in a success banner",
-        "The user registry table updates immediately after a successful assignment",
-        "Each registry row shows the auto-ID, a styled role badge, truncated Principal ID, and a copy button",
-        "Clicking 'Revoke' removes the user from the registry and the table updates accordingly",
-        "Empty state message is shown when no users have been assigned"
+        "frontend/public/sw.js exists with install, fetch, and activate event handlers",
+        "Static assets are cached on service worker install",
+        "App shell loads when network is offline (verified via DevTools Network > Offline mode)",
+        "Service worker is registered in index.html",
+        "Browser DevTools Application > Service Workers panel shows the worker as active"
       ]
     },
     {
-      "id": "REQ-30",
-      "text": "Update the Layout nav component (frontend/src/components/Layout.tsx) so that after a user logs in via Internet Identity: (1) The nav displays the user's auto-generated ID (from useMyProfile) as a styled label — e.g. 'writer_001'; (2) A role badge is shown next to the ID using a color-coded chip (Admin = dark blue, Editor = green, Writer = teal, Publisher = orange); (3) The existing copyable Principal ID display (PrincipalIdDisplay component) remains visible; (4) A 'Dashboard' link appears in the nav pointing to /dashboard; (5) If the user has no assigned role (useMyProfile returns null), no ID or role badge is shown — only the Principal ID and Dashboard link. All of this is only visible when authenticated.",
+      "id": "REQ-36",
+      "text": "Place the two generated PWA app icon PNG files as static assets at `frontend/public/assets/icons/icon-192x192.png` and `frontend/public/assets/icons/icon-512x512.png`. These paths must exactly match the icon references in manifest.json and the apple-touch-icon meta tag in index.html.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-recent-4",
+          "msg-recent-5"
         ],
         "quotes": [
-          "After login, nav displays the user's auto-generated ID, role badge, and copyable Principal ID",
-          "Single Internet Identity login button routes all roles to /dashboard"
+          "App icon assets in the required PWA sizes",
+          "app icons in standard sizes (192×192, 512×512)"
         ]
       },
       "acceptanceCriteria": [
-        "Authenticated user with an assigned role sees their auto-ID and a color-coded role badge in the nav",
-        "Authenticated user with no assigned role sees only their Principal ID and Dashboard link (no ID label or badge)",
-        "The 'Dashboard' nav link routes to /dashboard",
-        "The existing PrincipalIdDisplay component and login/logout button behavior are unchanged",
-        "All new nav elements are hidden when the user is not authenticated"
+        "frontend/public/assets/icons/icon-192x192.png exists and is a valid PNG",
+        "frontend/public/assets/icons/icon-512x512.png exists and is a valid PNG",
+        "Icon paths in manifest.json exactly match these file paths",
+        "Icons render correctly when the app is installed on Android or iOS home screen"
       ]
     },
     {
-      "id": "REQ-31",
-      "text": "In the existing AdminDashboardPage.tsx, migrate the Article Management and Citizen Post Moderation panels so they are also rendered inside the new DashboardPage.tsx Admin view tabs (Article Management tab and Citizen Post Moderation tab). The existing /admin route and AdminDashboardPage.tsx must remain functional for backward compatibility — it may re-use or import the same ArticleManagement and CitizenPostModeration components. Ensure no duplication of logic; both pages should use the same shared components.",
+      "id": "REQ-37",
+      "text": "Add an in-app PWA install prompt banner to the frontend. Listen for the `beforeinstallprompt` browser event, stash the event, and display a dismissible banner at the bottom of the screen (fixed position, z-index above content) with the Global Nexus blue (#1A6FBF) background, white text reading 'Install Global Nexus — get the full app experience on your home screen', and an 'Install' button that calls `prompt()` on the stashed event. Also show a small 'Add to Home Screen' button in the top nav area visible on mobile. Once installed or dismissed, hide the banner and store the dismissed state in localStorage so it does not reappear. The prompt must not appear on desktop browsers where PWA install is not applicable.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-recent-4",
+          "msg-recent-5"
         ],
         "quotes": [
-          "Admin view shows User Management (assign role + Principal, auto-generated ID, full registry), Article Management, and Citizen Post Moderation"
+          "Install prompt support so users on Android/iOS can add to home screen",
+          "install prompt support for Android/iOS home screen installation"
         ]
       },
       "acceptanceCriteria": [
-        "Article Management and Citizen Post Moderation functionality is accessible from /dashboard (Admin view tabs)",
-        "The existing /admin route still renders and works correctly",
-        "ArticleManagement and CitizenPostModeration are shared components used by both pages with no logic duplication"
-      ]
-    },
-    {
-      "id": "REQ-32",
-      "text": "Add English and Hindi translation strings to frontend/src/constants/translations.ts for all new UI strings introduced by the dashboard and role system. Required keys include: dashboard (Dashboard), userManagement (User Management), assignRole (Assign Role), roleRegistry (Role Registry), autoGeneratedId (Auto-Generated ID), revokeRole (Revoke), roleBadge labels for admin/writer/editor/publisher, noRoleAssigned (You have not been assigned a role yet. Please contact the admin.), assignSuccess (Assigned! ID: {id}), and any form labels and button text. All new static UI strings in DashboardPage.tsx and the nav additions must reference these translation keys via the existing useTranslation hook.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-recent"
-        ],
-        "quotes": [
-          "go ahed"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All new dashboard and role system UI strings have both 'en' and 'hi' entries in translations.ts",
-        "Switching the language toggle to Hindi renders all new UI strings in Hindi",
-        "No hardcoded English strings exist in DashboardPage.tsx or the new nav additions"
+        "A dismissible install banner appears at the bottom of the screen on mobile when the PWA install criteria are met",
+        "Clicking 'Install' triggers the native browser install prompt",
+        "Banner disappears after installation or dismissal and does not reappear after page reload",
+        "Banner does not appear on desktop browsers that do not support PWA install",
+        "Banner styling uses #1A6FBF background with white text, consistent with Global Nexus branding"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files listed in frontend.immutablePaths: useInternetIdentity.ts, useActor.ts, main.tsx, frontend/src/components/ui",
-    "All Motoko logic must remain in the single actor in backend/main.mo",
-    "The existing /admin route and AdminDashboardPage.tsx must remain functional",
-    "Existing assignRole, isAdmin, isEditor backend functions must remain intact",
-    "Auto-ID counters must use stable variables so they survive canister upgrades",
-    "Only admin-role principals may call assignRoleWithAutoId, revokeRole, and getUserRegistry"
+    "All existing features — news feed, citizen journalism, multimedia, dashboard, admin panel, role system, Hindi/English toggle, founder page, privacy/terms pages — must remain fully intact and functional",
+    "Do not modify any files listed under frontend.immutablePaths",
+    "PWA icons must be placed in frontend/public/assets/icons/ and referenced consistently across manifest.json and index.html",
+    "Service worker must not interfere with Internet Identity authentication flows or ICP canister API calls",
+    "Global Nexus branding (blue #1A6FBF, black #1a1a1a, logo) must be used throughout all PWA assets"
   ],
   "nonGoals": [
-    "Self-registration or role request flows — only admin assigns roles",
-    "Separate login buttons per role — a single Internet Identity login button is used",
-    "Email or SMS notifications when a role is assigned",
-    "Role-based article visibility restrictions for readers",
-    "Any external authentication providers beyond Internet Identity"
+    "Native iOS or Android app development",
+    "Backend changes — this is a frontend-only PWA conversion",
+    "Changing any existing page layouts, color schemes, or feature logic",
+    "Push notification support",
+    "Background sync beyond basic offline caching"
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Square app icon with Global Nexus blue globe logo centered on a dark charcoal (#1a1a1a) background, bold white 'GN' monogram overlay, clean and minimal (icon-192x192.dim_192x192.png)",
+      "Square app icon with Global Nexus blue globe logo centered on a dark charcoal (#1a1a1a) background, bold white 'GN' monogram overlay, clean and minimal, high resolution (icon-512x512.dim_512x512.png)"
+    ],
     "edits": []
   }
 }

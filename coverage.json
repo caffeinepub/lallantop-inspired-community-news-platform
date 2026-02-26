@@ -1,112 +1,87 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T10:41:00.509Z",
+  "generatedAt": "2026-02-26T10:52:57.130Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 7,
-    "implemented": 6,
+    "total": 5,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-26",
-        "summary": "Extend the Motoko backend actor in backend/main.mo to support an admin-assigned role system. Add a stable HashMap storing Principal → { autoId: Text, role: UserRole } where UserRole is a variant type with values #admin, #writer, #editor, #publisher. Add the following functions: (1) assignRoleWithAutoId(principal: Principal, role: UserRole): async Text — admin-only, auto-generates a unique ID in the format role_NNN (e.g. writer_001, publisher_003) using a monotonically incrementing counter per role type, stores the mapping, and returns the generated ID; (2) getMyProfile(): async ?{ autoId: Text; role: UserRole } — returns the calling principal's assigned profile or null if unassigned; (3) revokeRole(principal: Principal): async () — admin-only, removes the principal's entry from the registry; (4) getUserRegistry(): async [{ principal: Principal; autoId: Text; role: UserRole }] — admin-only, returns all assigned users. The auto-ID counter must be stable (persists across upgrades). Ensure the existing assignRole and isAdmin/isEditor helper functions remain intact and continue to work.",
-        "status": "unknown",
-        "plannedFiles": [],
+        "id": "REQ-33",
+        "summary": "Create a `frontend/public/manifest.json` file with the following PWA configuration: name set to 'Global Nexus', short_name set to 'Global Nexus', description set to 'Multilingual community-driven news platform', start_url set to '/', display set to 'standalone', orientation set to 'portrait', theme_color set to '#1A6FBF', background_color set to '#1a1a1a', icons array referencing the generated 192×192 icon at '/assets/icons/icon-192x192.png' and the 512×512 icon at '/assets/icons/icon-512x512.png' with type 'image/png' and purpose 'any maskable'.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/manifest.json"
+        ],
+        "matchedFiles": [
+          "frontend/public/manifest.json"
+        ]
+      },
+      {
+        "id": "REQ-34",
+        "summary": "Update `frontend/index.html` to add all required PWA meta tags: (1) `<link rel='manifest' href='/manifest.json'>`, (2) `<meta name='theme-color' content='#1A6FBF'>`, (3) `<meta name='mobile-web-app-capable' content='yes'>`, (4) `<meta name='apple-mobile-web-app-capable' content='yes'>`, (5) `<meta name='apple-mobile-web-app-status-bar-style' content='default'>`, (6) `<meta name='apple-mobile-web-app-title' content='Global Nexus'>`, (7) `<link rel='apple-touch-icon' href='/assets/icons/icon-192x192.png'>`, (8) `<meta name='msapplication-TileColor' content='#1A6FBF'>`, (9) `<meta name='msapplication-TileImage' content='/assets/icons/icon-192x192.png'>`. Ensure the existing title tag 'Global Nexus' and favicon link remain unchanged.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/index.html"
+        ]
+      },
+      {
+        "id": "REQ-35",
+        "summary": "Create a service worker file at `frontend/public/sw.js` that implements a cache-first strategy for the app shell and static assets, and a network-first strategy for API calls to the ICP backend. The service worker must: (1) cache all static assets (HTML, CSS, JS, images, fonts) on install using a cache named 'global-nexus-v1', (2) serve cached assets when offline, (3) use network-first for any fetch requests to '/api' or ICP canister URLs so fresh content is always attempted first, (4) include an activate handler that clears old cache versions. Register the service worker in `frontend/index.html` via an inline script that calls `navigator.serviceWorker.register('/sw.js')` only if `'serviceWorker' in navigator`.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/sw.js",
+          "frontend/index.html"
+        ],
+        "matchedFiles": [
+          "frontend/public/sw.js",
+          "frontend/index.html"
+        ]
+      },
+      {
+        "id": "REQ-36",
+        "summary": "Place the two generated PWA app icon PNG files as static assets at `frontend/public/assets/icons/icon-192x192.png` and `frontend/public/assets/icons/icon-512x512.png`. These paths must exactly match the icon references in manifest.json and the apple-touch-icon meta tag in index.html.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/public/assets/icons/icon-192x192.png",
+          "frontend/public/assets/icons/icon-512x512.png"
+        ],
         "matchedFiles": []
       },
       {
-        "id": "REQ-27",
-        "summary": "Add a useRoleSystem hook (or extend useQueries.ts) with React Query hooks that call the new backend functions: useMyProfile() — calls getMyProfile(), useUserRegistry() — calls getUserRegistry() (admin only), useAssignRoleWithAutoId() — mutation calling assignRoleWithAutoId(principal, role), useRevokeRole() — mutation calling revokeRole(principal). All queries should invalidate appropriately on mutation success.",
+        "id": "REQ-37",
+        "summary": "Add an in-app PWA install prompt banner to the frontend. Listen for the `beforeinstallprompt` browser event, stash the event, and display a dismissible banner at the bottom of the screen (fixed position, z-index above content) with the Global Nexus blue (#1A6FBF) background, white text reading 'Install Global Nexus — get the full app experience on your home screen', and an 'Install' button that calls `prompt()` on the stashed event. Also show a small 'Add to Home Screen' button in the top nav area visible on mobile. Once installed or dismissed, hide the banner and store the dismissed state in localStorage so it does not reappear. The prompt must not appear on desktop browsers where PWA install is not applicable.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
-      },
-      {
-        "id": "REQ-28",
-        "summary": "Create a new frontend/src/pages/DashboardPage.tsx at route /dashboard. After login the user is routed to /dashboard. The page reads the logged-in user's profile via useMyProfile(). It renders four distinct views based on the user's assigned role: (1) Admin view — tabbed panel with 'User Management', 'Article Management', and 'Citizen Post Moderation' tabs; (2) Writer/Editor view — panel to create and manage the user's own submitted articles (list own articles, create new article form); (3) Publisher view — panel to review pending articles and approve/publish them; (4) Unassigned view — a centered message reading 'You have not been assigned a role yet. Please contact the admin.' with the user's copyable Principal ID shown. Unauthenticated users visiting /dashboard are redirected to the homepage. Register the /dashboard route in App.tsx.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/DashboardPage.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/DashboardPage.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-29",
-        "summary": "Build the User Management tab inside DashboardPage.tsx (visible to Admin role only). This tab contains: (1) An 'Assign Role' form with two inputs — a Principal ID text field and a role selector dropdown (options: Writer, Editor, Publisher, Admin) — plus an 'Assign' button that calls useAssignRoleWithAutoId. On success, display the generated auto-ID in a success banner (e.g. 'Assigned! ID: writer_003'). (2) A full User Registry table listing all assigned users with columns: Auto-Generated ID, Role badge, Principal ID (truncated, with copy button), and a 'Revoke' action button that calls useRevokeRole. The table must show an empty state message if no users are assigned.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/UserManagement.tsx",
-          "frontend/src/pages/DashboardPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/UserManagement.tsx",
-          "frontend/src/pages/DashboardPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-30",
-        "summary": "Update the Layout nav component (frontend/src/components/Layout.tsx) so that after a user logs in via Internet Identity: (1) The nav displays the user's auto-generated ID (from useMyProfile) as a styled label — e.g. 'writer_001'; (2) A role badge is shown next to the ID using a color-coded chip (Admin = dark blue, Editor = green, Writer = teal, Publisher = orange); (3) The existing copyable Principal ID display (PrincipalIdDisplay component) remains visible; (4) A 'Dashboard' link appears in the nav pointing to /dashboard; (5) If the user has no assigned role (useMyProfile returns null), no ID or role badge is shown — only the Principal ID and Dashboard link. All of this is only visible when authenticated.",
-        "status": "implemented",
-        "plannedFiles": [
+          "frontend/src/components/PWAInstallPrompt.tsx",
           "frontend/src/components/Layout.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/components/PWAInstallPrompt.tsx",
           "frontend/src/components/Layout.tsx"
-        ]
-      },
-      {
-        "id": "REQ-31",
-        "summary": "In the existing AdminDashboardPage.tsx, migrate the Article Management and Citizen Post Moderation panels so they are also rendered inside the new DashboardPage.tsx Admin view tabs (Article Management tab and Citizen Post Moderation tab). The existing /admin route and AdminDashboardPage.tsx must remain functional for backward compatibility — it may re-use or import the same ArticleManagement and CitizenPostModeration components. Ensure no duplication of logic; both pages should use the same shared components.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/DashboardPage.tsx",
-          "frontend/src/pages/AdminDashboardPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/DashboardPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-32",
-        "summary": "Add English and Hindi translation strings to frontend/src/constants/translations.ts for all new UI strings introduced by the dashboard and role system. Required keys include: dashboard (Dashboard), userManagement (User Management), assignRole (Assign Role), roleRegistry (Role Registry), autoGeneratedId (Auto-Generated ID), revokeRole (Revoke), roleBadge labels for admin/writer/editor/publisher, noRoleAssigned (You have not been assigned a role yet. Please contact the admin.), assignSuccess (Assigned! ID: {id}), and any form labels and button text. All new static UI strings in DashboardPage.tsx and the nav additions must reference these translation keys via the existing useTranslation hook.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/constants/translations.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/constants/translations.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
+    "frontend/index.html",
+    "frontend/public/assets/generated/icon-192x192.dim_192x192.png",
+    "frontend/public/assets/generated/icon-512x512.dim_512x512.png",
+    "frontend/public/manifest.json",
+    "frontend/public/sw.js",
     "frontend/src/components/Layout.tsx",
-    "frontend/src/components/UserManagement.tsx",
-    "frontend/src/constants/translations.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/components/PWAInstallPrompt.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
