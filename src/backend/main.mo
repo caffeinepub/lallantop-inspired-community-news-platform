@@ -1,15 +1,13 @@
 import Map "mo:core/Map";
-import Iter "mo:core/Iter";
 import Text "mo:core/Text";
 import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import MixinAuthorization "authorization/MixinAuthorization";
-import AccessControl "authorization/access-control";
 import Migration "migration";
+import AccessControl "authorization/access-control";
 
-// Data migration must happen before any data is used
 (with migration = Migration.run)
 actor {
   public type UniqueId = Nat;
@@ -110,10 +108,27 @@ actor {
 
   public shared ({ caller }) func initialize() : async () {
     if (isInitialized) { Runtime.trap("Already initialized") };
-
     isInitialized := true;
     seedArticles();
     seedMediaItems();
+    bootstrapAdmin();
+  };
+
+  func bootstrapAdmin() {
+    let adminPrincipalText = "zp4yw-opure-zd32q-abgvl-2uyfg-abiqw-tqwyy-hej2s-mzler-4n37y-dqe";
+    let adminPrincipal = Principal.fromText(adminPrincipalText);
+
+    let adminEntry : UserRegistryEntry = {
+      autoId = "admin_gn_001";
+      role = #admin;
+    };
+
+    // First, directly insert into userRegistry (bypassing role checks)
+    userRegistry.add(adminPrincipal, adminEntry);
+
+    // Then assign the role in the access control system
+    // This call uses the admin principal as both caller and user to bootstrap
+    AccessControl.assignRole(accessControlState, adminPrincipal, adminPrincipal, #admin);
   };
 
   func getNextId() : UniqueId {
@@ -125,8 +140,9 @@ actor {
   // ── User Profile Functions ─────────────────────────────────────────
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only registered users can view their profile");
+    let role = AccessControl.getUserRole(accessControlState, caller);
+    if (role == #guest) {
+      return null;
     };
     userProfiles.get(caller);
   };
@@ -139,7 +155,8 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    let role = AccessControl.getUserRole(accessControlState, caller);
+    if (role == #guest) {
       Runtime.trap("Unauthorized: Only registered users can save profiles");
     };
     userProfiles.add(caller, profile);
@@ -153,9 +170,9 @@ actor {
     };
 
     let autoId = switch (role) {
-      case (#admin) { "admin_" # Nat.toText(userRegistryCounter) };
-      case (#user) { "user_" # Nat.toText(userRegistryCounter) };
-      case (#guest) { "guest_" # Nat.toText(userRegistryCounter) };
+      case (#admin) { "admin_" # userRegistryCounter.toText() };
+      case (#user) { "user_" # userRegistryCounter.toText() };
+      case (#guest) { "guest_" # userRegistryCounter.toText() };
     };
 
     let entry : UserRegistryEntry = { autoId; role };
@@ -177,8 +194,7 @@ actor {
       Runtime.trap("Unauthorized: Only admins can revoke roles");
     };
     userRegistry.remove(user);
-    // Note: AccessControl module doesn't expose a revoke function,
-    // so we assign guest role which is the default
+    // Assign guest role, which is default
     AccessControl.assignRole(accessControlState, caller, user, #guest);
   };
 
@@ -249,7 +265,8 @@ actor {
     authorName : Text,
     imageUrl : Text,
   ) : async UniqueId {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    let role = AccessControl.getUserRole(accessControlState, caller);
+    if (role == #guest) {
       Runtime.trap("Unauthorized: Only registered users can create citizen posts");
     };
     let id = getNextId();
@@ -274,7 +291,8 @@ actor {
     authorName : Text,
     body : Text,
   ) : async UniqueId {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+    let role = AccessControl.getUserRole(accessControlState, caller);
+    if (role == #guest) {
       Runtime.trap("Unauthorized: Only registered users can add comments");
     };
     let id = getNextId();
@@ -520,230 +538,6 @@ actor {
         author = "Sunita Rao";
         authorRole = "Environment Reporter";
         imageUrl = "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "India's Startup Ecosystem Attracts Record FDI";
-        titleHindi = "भारत के स्टार्टअप इकोसिस्टम ने रिकॉर्ड एफडीआई आकर्षित किया";
-        body = "Businesses are rapidly adopting digital technologies as India's startup ecosystem attracts record foreign direct investment, with over 100 new unicorns emerging in the past year alone.";
-        bodyHindi = "व्यवसाय तेजी से डिजिटल तकनीकों को अपना रहे हैं क्योंकि भारत के स्टार्टअप इकोसिस्टम ने रिकॉर्ड विदेशी प्रत्यक्ष निवेश आकर्षित किया है।";
-        category = #business;
-        author = "Rohit Joshi";
-        authorRole = "Business Reporter";
-        imageUrl = "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "AIIMS Researchers Develop Breakthrough Cancer Vaccine";
-        titleHindi = "एम्स शोधकर्ताओं ने कैंसर वैक्सीन में सफलता हासिल की";
-        body = "Researchers at AIIMS have achieved a significant medical breakthrough with a new cancer vaccine that has shown 90% efficacy in early clinical trials, offering hope to millions of patients.";
-        bodyHindi = "एम्स के शोधकर्ताओं ने एक नई कैंसर वैक्सीन के साथ महत्वपूर्ण चिकित्सा सफलता हासिल की है जिसने प्रारंभिक नैदानिक परीक्षणों में 90% प्रभावकारिता दिखाई है।";
-        category = #technology;
-        author = "Dr. Priya Menon";
-        authorRole = "Health Correspondent";
-        imageUrl = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "PM Launches Smart Cities Mission Phase 3";
-        titleHindi = "पीएम ने स्मार्ट सिटीज मिशन चरण 3 लॉन्च किया";
-        body = "Local governments are launching new initiatives as the Prime Minister unveils Phase 3 of the Smart Cities Mission, targeting 50 additional cities with investments in digital infrastructure and sustainable urban development.";
-        bodyHindi = "स्थानीय सरकारें नई पहल शुरू कर रही हैं क्योंकि प्रधानमंत्री ने स्मार्ट सिटीज मिशन के चरण 3 का अनावरण किया है।";
-        category = #india;
-        author = "Deepak Sharma";
-        authorRole = "Political Correspondent";
-        imageUrl = "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "COP30 Climate Summit Reaches Historic Agreement";
-        titleHindi = "COP30 जलवायु शिखर सम्मेलन ने ऐतिहासिक समझौता किया";
-        body = "Leaders discuss solutions at the climate change summit as COP30 concludes with a historic agreement committing 195 nations to net-zero emissions by 2045, the most ambitious climate deal ever signed.";
-        bodyHindi = "नेता जलवायु परिवर्तन सम्मेलन में समाधान पर चर्चा कर रहे हैं क्योंकि COP30 एक ऐतिहासिक समझौते के साथ समाप्त हुआ जो 195 देशों को 2045 तक शुद्ध-शून्य उत्सर्जन के लिए प्रतिबद्ध करता है।";
-        category = #world;
-        author = "Aisha Khan";
-        authorRole = "World Affairs Editor";
-        imageUrl = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "India's Space Ambitions Soar";
-        titleHindi = "भारत की अंतरिक्ष महत्वाकांक्षाएँ बढ़ीं";
-        body = "India has announced plans for new space missions, including a manned mission to Mars by 2030 and expanded satellite launches.";
-        bodyHindi = "भारत ने 2030 तक मंगल ग्रह पर मानव मिशन समेत नए अंतरिक्ष अभियानों की योजना बनाई है।";
-        category = #india;
-        author = "Ritu Malhotra";
-        authorRole = "Science Editor";
-        imageUrl = "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "Digital India Expands Broadband Access";
-        titleHindi = "डिजिटल इंडिया ने ब्रॉडबैंड एक्सेस का विस्तार किया";
-        body = "The government has launched a new initiative to provide broadband internet to rural villages, improving connectivity and access to digital services.";
-        bodyHindi = "सरकार ने ग्रामीण गांवों में ब्रॉडबैंड इंटरनेट प्रदान करने की नई पहल शुरू की है।";
-        category = #india;
-        author = "Ajay Singh";
-        authorRole = "Technology Editor";
-        imageUrl = "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "Global Vaccination Drives Reach New Milestone";
-        titleHindi = "वैश्विक टीकाकरण अभियानों में नई उपलब्धि";
-        body = "International organizations have reported record progress in vaccination drives, reaching remote regions and improving global health outcomes.";
-        bodyHindi = "अंतर्राष्ट्रीय संगठनों ने दूरदराज के क्षेत्रों में टीकाकरण अभियानों में रिकॉर्ड प्रगति की सूचना दी है।";
-        category = #world;
-        author = "Emily Watson";
-        authorRole = "Health Correspondent";
-        imageUrl = "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "World Education Summit Promotes Learning Equality";
-        titleHindi = "विश्व शिक्षा शिखर सम्मेलन ने शिक्षा समानता को बढ़ावा दिया";
-        body = "Leaders from around the globe have gathered to discuss initiatives aimed at promoting equal access to quality education.";
-        bodyHindi = "दुनिया भर के नेता गुणवत्तापूर्ण शिक्षा के समान पहुंच को बढ़ावा देने के लिए पहलों पर चर्चा करने के लिए एकत्रित हुए हैं।";
-        category = #world;
-        author = "Lina Garcia";
-        authorRole = "Education Reporter";
-        imageUrl = "https://images.unsplash.com/photo-1482062364825-616fd23b8fc1?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "India Shines in International Cricket League";
-        titleHindi = "अंतर्राष्ट्रीय क्रिकेट लीग में भारत ने चमक बिखेरी";
-        body = "Indian cricket players have shown outstanding performance in the latest international league, bringing home several awards.";
-        bodyHindi = "भारतीय क्रिकेट खिलाड़ियों ने नवीनतम अंतर्राष्ट्रीय लीग में उत्कृष्ट प्रदर्शन किया।";
-        category = #sports;
-        author = "Rajesh Patel";
-        authorRole = "Sports Analyst";
-        imageUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "Olympic Games: Indian Contingent Gears Up";
-        titleHindi = "ओलंपिक खेलों के लिए भारतीय दल तैयार";
-        body = "Indian athletes are in spirit and readiness as they prepare for upcoming Olympic competitions.";
-        bodyHindi = "भारतीय एथलीट आगामी ओलंपिक प्रतियोगिताओं की तैयारी में पूरी उत्साह और तत्परता दिखा रहे हैं।";
-        category = #sports;
-        author = "Meera Dubey";
-        authorRole = "Sports Correspondent";
-        imageUrl = "https://images.unsplash.com/photo-1519864600265-abb113f9c3e1?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "Bollywood Embraces Digital Film Releases";
-        titleHindi = "बॉलीवुड ने डिजिटल फिल्म रिलीज़ को अपनाया";
-        body = "With the changing landscape of cinema, Bollywood is increasingly embracing digital-first releases.";
-        bodyHindi = "बदलते सिनेमा परिदृश्य के साथ, बॉलीवुड डिजिटल-फर्स्ट रिलीज़ को तेजी से अपना रहा है।";
-        category = #entertainment;
-        author = "Divya Sharma";
-        authorRole = "Entertainment Reporter";
-        imageUrl = "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "Indie Music Scene Booms in India";
-        titleHindi = "भारत में इंडी म्यूजिक सीन की शानदार बढ़ोतरी";
-        body = "Independent music in India is booming with new artists entering the scene.";
-        bodyHindi = "भारत में इंडिपेंडेंट म्यूजिक सेक्टर तेजी से बढ़ रहा है और नए कलाकार इसमें अपनी जगह बना रहे हैं।";
-        category = #entertainment;
-        author = "Rohan Jain";
-        authorRole = "Music Analyst";
-        imageUrl = "https://images.unsplash.com/photo-1488129320317-6d079724b4a7?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "India Leads in ICT Innovation";
-        titleHindi = "आईसीटी नवाचारों में भारत अग्रणी";
-        body = "India continues to lead in ICT (Information and Communication Technology) innovations, with new startups emerging across all fields.";
-        bodyHindi = "भारत आईसीटी (सूचना और संचार प्रौद्योगिकी) नवाचारों में अग्रणी बनता जा रहा है।";
-        category = #technology;
-        author = "Sapna Rao";
-        authorRole = "Tech Editor";
-        imageUrl = "https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "Breakthroughs in AI Healthcare in India";
-        titleHindi = "भारत में एआई हेल्थकेयर में बड़ी उपलब्धियां";
-        body = "AI-powered healthcare solutions are making waves in India, providing faster diagnoses and personalized treatment plans.";
-        bodyHindi = "एआई-आधारित हेल्थकेयर समाधान भारत में त्वरित निदान और व्यक्तिगत इलाज की दिशा निर्धारित कर रहे हैं।";
-        category = #technology;
-        author = "Manish Verma";
-        authorRole = "Healthcare Correspondent";
-        imageUrl = "https://images.unsplash.com/photo-1482062364825-616fd23b8fc1?w=800";
-        publishedAt = Time.now();
-        isBreaking = true;
-        isFeatured = false;
-      },
-      {
-        id = getNextId();
-        title = "India's E-Commerce Sector Grows Rapidly";
-        titleHindi = "भारत का ई-कॉमर्स क्षेत्र तेजी से बढ़ा";
-        body = "India's e-commerce sector is experiencing rapid growth, with more businesses and consumers moving online.";
-        bodyHindi = "भारत का ई-कॉमर्स क्षेत्र तेज़ी से बढ़ रहा है, अधिक व्यवसाय और उपभोक्ता ऑनलाइन हो रहे हैं।";
-        category = #business;
-        author = "Kiran Joshi";
-        authorRole = "Business Analyst";
-        imageUrl = "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800";
-        publishedAt = Time.now();
-        isBreaking = false;
-        isFeatured = true;
-      },
-      {
-        id = getNextId();
-        title = "Financial Inclusion Reaches Rural India";
-        titleHindi = "वित्तीय समावेशन ग्रामीण भारत तक पहुँचा";
-        body = "Efforts to promote financial inclusion are making significant progress in rural India, with new banking and fintech initiatives.";
-        bodyHindi = "ग्रामीण भारत में वित्तीय समावेशन को प्रोत्साहित करने के प्रयासों ने महत्वपूर्ण प्रगति की है।";
-        category = #business;
-        author = "Pooja Deshmukh";
-        authorRole = "Economics Reporter";
-        imageUrl = "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=800";
         publishedAt = Time.now();
         isBreaking = true;
         isFeatured = false;
