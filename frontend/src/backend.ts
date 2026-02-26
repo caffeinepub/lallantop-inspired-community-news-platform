@@ -89,41 +89,6 @@ export class ExternalBlob {
         return this;
     }
 }
-export type Timestamp = bigint;
-export interface Comment {
-    id: UniqueId;
-    body: string;
-    createdAt: Timestamp;
-    authorName: string;
-    articleId?: UniqueId;
-    authorPrincipal: Principal;
-    postId?: UniqueId;
-}
-export type UniqueId = bigint;
-export interface MediaItem {
-    id: UniqueId;
-    title: string;
-    thumbnailUrl: string;
-    publishedAt: Timestamp;
-    mediaType: MediaType;
-    embedUrl: string;
-}
-export interface CitizenPost {
-    id: UniqueId;
-    status: CitizenPostStatus;
-    title: string;
-    body: string;
-    authorName: string;
-    publishedAt: Timestamp;
-    imageUrl: string;
-    category: ArticleCategory;
-    authorPrincipal: Principal;
-}
-export interface UserProfile {
-    bio: string;
-    name: string;
-    avatarUrl: string;
-}
 export interface Article {
     id: UniqueId;
     title: string;
@@ -137,6 +102,45 @@ export interface Article {
     isFeatured: boolean;
     category: ArticleCategory;
     bodyHindi: string;
+}
+export type Timestamp = bigint;
+export interface Comment {
+    id: UniqueId;
+    body: string;
+    createdAt: Timestamp;
+    authorName: string;
+    articleId?: UniqueId;
+    authorPrincipal: Principal;
+    postId?: UniqueId;
+}
+export type UniqueId = bigint;
+export interface UserRegistryEntry {
+    role: UserRole;
+    autoId: string;
+}
+export interface MediaItem {
+    id: UniqueId;
+    title: string;
+    thumbnailUrl: string;
+    publishedAt: Timestamp;
+    mediaType: MediaType;
+    embedUrl: string;
+}
+export interface UserProfile {
+    bio: string;
+    name: string;
+    avatarUrl: string;
+}
+export interface CitizenPost {
+    id: UniqueId;
+    status: CitizenPostStatus;
+    title: string;
+    body: string;
+    authorName: string;
+    publishedAt: Timestamp;
+    imageUrl: string;
+    category: ArticleCategory;
+    authorPrincipal: Principal;
 }
 export enum ArticleCategory {
     entertainment = "entertainment",
@@ -165,6 +169,7 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     addComment(articleId: UniqueId | null, postId: UniqueId | null, authorName: string, body: string): Promise<UniqueId>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    assignRoleWithAutoId(user: Principal, role: UserRole): Promise<string>;
     createArticle(title: string, titleHindi: string, body: string, bodyHindi: string, category: ArticleCategory, author: string, authorRole: string, imageUrl: string, isBreaking: boolean, isFeatured: boolean): Promise<UniqueId>;
     createCitizenPost(title: string, body: string, category: ArticleCategory, authorName: string, imageUrl: string): Promise<UniqueId>;
     getArticles(): Promise<Array<Article>>;
@@ -176,16 +181,22 @@ export interface backendInterface {
     getCommentsByArticle(articleId: UniqueId): Promise<Array<Comment>>;
     getFeaturedArticles(): Promise<Array<Article>>;
     getMediaItems(): Promise<Array<MediaItem>>;
-    getRoleForPrincipal(user: Principal): Promise<UserRole>;
+    getMyProfile(): Promise<UserRegistryEntry | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserRegistry(): Promise<Array<{
+        principal: Principal;
+        role: UserRole;
+        autoId: string;
+    }>>;
     initialize(): Promise<void>;
     isAdminCaller(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isEditorCaller(): Promise<boolean>;
+    revokeRole(user: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateArticleStatus(postId: UniqueId, newStatus: CitizenPostStatus): Promise<void>;
 }
-import type { Article as _Article, ArticleCategory as _ArticleCategory, CitizenPost as _CitizenPost, CitizenPostStatus as _CitizenPostStatus, Comment as _Comment, MediaItem as _MediaItem, MediaType as _MediaType, Timestamp as _Timestamp, UniqueId as _UniqueId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { Article as _Article, ArticleCategory as _ArticleCategory, CitizenPost as _CitizenPost, CitizenPostStatus as _CitizenPostStatus, Comment as _Comment, MediaItem as _MediaItem, MediaType as _MediaType, Timestamp as _Timestamp, UniqueId as _UniqueId, UserProfile as _UserProfile, UserRegistryEntry as _UserRegistryEntry, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -227,6 +238,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n2(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async assignRoleWithAutoId(arg0: Principal, arg1: UserRole): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.assignRoleWithAutoId(arg0, to_candid_UserRole_n2(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.assignRoleWithAutoId(arg0, to_candid_UserRole_n2(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -384,18 +409,18 @@ export class Backend implements backendInterface {
             return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getRoleForPrincipal(arg0: Principal): Promise<UserRole> {
+    async getMyProfile(): Promise<UserRegistryEntry | null> {
         if (this.processError) {
             try {
-                const result = await this.actor.getRoleForPrincipal(arg0);
-                return from_candid_UserRole_n12(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.getMyProfile();
+                return from_candid_opt_n28(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getRoleForPrincipal(arg0);
-            return from_candid_UserRole_n12(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.getMyProfile();
+            return from_candid_opt_n28(this._uploadFile, this._downloadFile, result);
         }
     }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
@@ -410,6 +435,24 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getUserProfile(arg0);
             return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getUserRegistry(): Promise<Array<{
+        principal: Principal;
+        role: UserRole;
+        autoId: string;
+    }>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserRegistry();
+                return from_candid_vec_n31(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserRegistry();
+            return from_candid_vec_n31(this._uploadFile, this._downloadFile, result);
         }
     }
     async initialize(): Promise<void> {
@@ -468,6 +511,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async revokeRole(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.revokeRole(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.revokeRole(arg0);
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -485,14 +542,14 @@ export class Backend implements backendInterface {
     async updateArticleStatus(arg0: UniqueId, arg1: CitizenPostStatus): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateArticleStatus(arg0, to_candid_CitizenPostStatus_n28(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.updateArticleStatus(arg0, to_candid_CitizenPostStatus_n33(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateArticleStatus(arg0, to_candid_CitizenPostStatus_n28(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.updateArticleStatus(arg0, to_candid_CitizenPostStatus_n33(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -518,6 +575,9 @@ function from_candid_MediaItem_n24(_uploadFile: (file: ExternalBlob) => Promise<
 function from_candid_MediaType_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _MediaType): MediaType {
     return from_candid_variant_n27(_uploadFile, _downloadFile, value);
 }
+function from_candid_UserRegistryEntry_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRegistryEntry): UserRegistryEntry {
+    return from_candid_record_n30(_uploadFile, _downloadFile, value);
+}
 function from_candid_UserRole_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
     return from_candid_variant_n13(_uploadFile, _downloadFile, value);
 }
@@ -526,6 +586,9 @@ function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 }
 function from_candid_opt_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UniqueId]): UniqueId | null {
     return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserRegistryEntry]): UserRegistryEntry | null {
+    return value.length === 0 ? null : from_candid_UserRegistryEntry_n29(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_record_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: _UniqueId;
@@ -609,6 +672,33 @@ function from_candid_record_n25(_uploadFile: (file: ExternalBlob) => Promise<Uin
         publishedAt: value.publishedAt,
         mediaType: from_candid_MediaType_n26(_uploadFile, _downloadFile, value.mediaType),
         embedUrl: value.embedUrl
+    };
+}
+function from_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    role: _UserRole;
+    autoId: string;
+}): {
+    role: UserRole;
+    autoId: string;
+} {
+    return {
+        role: from_candid_UserRole_n12(_uploadFile, _downloadFile, value.role),
+        autoId: value.autoId
+    };
+}
+function from_candid_record_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    principal: Principal;
+    role: _UserRole;
+    autoId: string;
+}): {
+    principal: Principal;
+    role: UserRole;
+    autoId: string;
+} {
+    return {
+        principal: value.principal,
+        role: from_candid_UserRole_n12(_uploadFile, _downloadFile, value.role),
+        autoId: value.autoId
     };
 }
 function from_candid_record_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -704,35 +794,31 @@ function from_candid_vec_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 function from_candid_vec_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_MediaItem>): Array<MediaItem> {
     return value.map((x)=>from_candid_MediaItem_n24(_uploadFile, _downloadFile, x));
 }
+function from_candid_vec_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<{
+    principal: Principal;
+    role: _UserRole;
+    autoId: string;
+}>): Array<{
+    principal: Principal;
+    role: UserRole;
+    autoId: string;
+}> {
+    return value.map((x)=>from_candid_record_n32(_uploadFile, _downloadFile, x));
+}
 function from_candid_vec_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Article>): Array<Article> {
     return value.map((x)=>from_candid_Article_n7(_uploadFile, _downloadFile, x));
 }
 function to_candid_ArticleCategory_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ArticleCategory): _ArticleCategory {
     return to_candid_variant_n5(_uploadFile, _downloadFile, value);
 }
-function to_candid_CitizenPostStatus_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: CitizenPostStatus): _CitizenPostStatus {
-    return to_candid_variant_n29(_uploadFile, _downloadFile, value);
+function to_candid_CitizenPostStatus_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: CitizenPostStatus): _CitizenPostStatus {
+    return to_candid_variant_n34(_uploadFile, _downloadFile, value);
 }
 function to_candid_UserRole_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n3(_uploadFile, _downloadFile, value);
 }
 function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UniqueId | null): [] | [_UniqueId] {
     return value === null ? candid_none() : candid_some(value);
-}
-function to_candid_variant_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: CitizenPostStatus): {
-    pending: null;
-} | {
-    approved: null;
-} | {
-    rejected: null;
-} {
-    return value == CitizenPostStatus.pending ? {
-        pending: null
-    } : value == CitizenPostStatus.approved ? {
-        approved: null
-    } : value == CitizenPostStatus.rejected ? {
-        rejected: null
-    } : value;
 }
 function to_candid_variant_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
     admin: null;
@@ -747,6 +833,21 @@ function to_candid_variant_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         user: null
     } : value == UserRole.guest ? {
         guest: null
+    } : value;
+}
+function to_candid_variant_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: CitizenPostStatus): {
+    pending: null;
+} | {
+    approved: null;
+} | {
+    rejected: null;
+} {
+    return value == CitizenPostStatus.pending ? {
+        pending: null
+    } : value == CitizenPostStatus.approved ? {
+        approved: null
+    } : value == CitizenPostStatus.rejected ? {
+        rejected: null
     } : value;
 }
 function to_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ArticleCategory): {

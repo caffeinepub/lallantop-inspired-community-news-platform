@@ -80,6 +80,10 @@ export const MediaItem = IDL.Record({
   'mediaType' : MediaType,
   'embedUrl' : IDL.Text,
 });
+export const UserRegistryEntry = IDL.Record({
+  'role' : UserRole,
+  'autoId' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -89,6 +93,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'assignRoleWithAutoId' : IDL.Func([IDL.Principal, UserRole], [IDL.Text], []),
   'createArticle' : IDL.Func(
       [
         IDL.Text,
@@ -123,16 +128,30 @@ export const idlService = IDL.Service({
   'getCommentsByArticle' : IDL.Func([UniqueId], [IDL.Vec(Comment)], ['query']),
   'getFeaturedArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
   'getMediaItems' : IDL.Func([], [IDL.Vec(MediaItem)], ['query']),
-  'getRoleForPrincipal' : IDL.Func([IDL.Principal], [UserRole], ['query']),
+  'getMyProfile' : IDL.Func([], [IDL.Opt(UserRegistryEntry)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'getUserRegistry' : IDL.Func(
+      [],
+      [
+        IDL.Vec(
+          IDL.Record({
+            'principal' : IDL.Principal,
+            'role' : UserRole,
+            'autoId' : IDL.Text,
+          })
+        ),
+      ],
       ['query'],
     ),
   'initialize' : IDL.Func([], [], []),
   'isAdminCaller' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isEditorCaller' : IDL.Func([], [IDL.Bool], ['query']),
+  'revokeRole' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateArticleStatus' : IDL.Func([UniqueId, CitizenPostStatus], [], []),
 });
@@ -212,6 +231,10 @@ export const idlFactory = ({ IDL }) => {
     'mediaType' : MediaType,
     'embedUrl' : IDL.Text,
   });
+  const UserRegistryEntry = IDL.Record({
+    'role' : UserRole,
+    'autoId' : IDL.Text,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -221,6 +244,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'assignRoleWithAutoId' : IDL.Func(
+        [IDL.Principal, UserRole],
+        [IDL.Text],
+        [],
+      ),
     'createArticle' : IDL.Func(
         [
           IDL.Text,
@@ -259,16 +287,30 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getFeaturedArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
     'getMediaItems' : IDL.Func([], [IDL.Vec(MediaItem)], ['query']),
-    'getRoleForPrincipal' : IDL.Func([IDL.Principal], [UserRole], ['query']),
+    'getMyProfile' : IDL.Func([], [IDL.Opt(UserRegistryEntry)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'getUserRegistry' : IDL.Func(
+        [],
+        [
+          IDL.Vec(
+            IDL.Record({
+              'principal' : IDL.Principal,
+              'role' : UserRole,
+              'autoId' : IDL.Text,
+            })
+          ),
+        ],
         ['query'],
       ),
     'initialize' : IDL.Func([], [], []),
     'isAdminCaller' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isEditorCaller' : IDL.Func([], [IDL.Bool], ['query']),
+    'revokeRole' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateArticleStatus' : IDL.Func([UniqueId, CitizenPostStatus], [], []),
   });

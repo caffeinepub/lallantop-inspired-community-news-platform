@@ -1,66 +1,112 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T09:56:13.760Z",
+  "generatedAt": "2026-02-26T10:41:00.509Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 7,
+    "implemented": 6,
     "items": [
       {
-        "id": "REQ-21",
-        "summary": "Create a Privacy Policy page at route /privacy displaying all 9 sections: (1) Introduction, (2) Data Collection, (3) User Consent, (4) Data Usage, (5) Legal Compliance, (6) Data Security, (7) User Rights, (8) Transparency & Updates, (9) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /privacy route in App.tsx.",
+        "id": "REQ-26",
+        "summary": "Extend the Motoko backend actor in backend/main.mo to support an admin-assigned role system. Add a stable HashMap storing Principal → { autoId: Text, role: UserRole } where UserRole is a variant type with values #admin, #writer, #editor, #publisher. Add the following functions: (1) assignRoleWithAutoId(principal: Principal, role: UserRole): async Text — admin-only, auto-generates a unique ID in the format role_NNN (e.g. writer_001, publisher_003) using a monotonically incrementing counter per role type, stores the mapping, and returns the generated ID; (2) getMyProfile(): async ?{ autoId: Text; role: UserRole } — returns the calling principal's assigned profile or null if unassigned; (3) revokeRole(principal: Principal): async () — admin-only, removes the principal's entry from the registry; (4) getUserRegistry(): async [{ principal: Principal; autoId: Text; role: UserRole }] — admin-only, returns all assigned users. The auto-ID counter must be stable (persists across upgrades). Ensure the existing assignRole and isAdmin/isEditor helper functions remain intact and continue to work.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-27",
+        "summary": "Add a useRoleSystem hook (or extend useQueries.ts) with React Query hooks that call the new backend functions: useMyProfile() — calls getMyProfile(), useUserRegistry() — calls getUserRegistry() (admin only), useAssignRoleWithAutoId() — mutation calling assignRoleWithAutoId(principal, role), useRevokeRole() — mutation calling revokeRole(principal). All queries should invalidate appropriately on mutation success.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/PrivacyPolicyPage.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-28",
+        "summary": "Create a new frontend/src/pages/DashboardPage.tsx at route /dashboard. After login the user is routed to /dashboard. The page reads the logged-in user's profile via useMyProfile(). It renders four distinct views based on the user's assigned role: (1) Admin view — tabbed panel with 'User Management', 'Article Management', and 'Citizen Post Moderation' tabs; (2) Writer/Editor view — panel to create and manage the user's own submitted articles (list own articles, create new article form); (3) Publisher view — panel to review pending articles and approve/publish them; (4) Unassigned view — a centered message reading 'You have not been assigned a role yet. Please contact the admin.' with the user's copyable Principal ID shown. Unauthenticated users visiting /dashboard are redirected to the homepage. Register the /dashboard route in App.tsx.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/DashboardPage.tsx",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/PrivacyPolicyPage.tsx",
+          "frontend/src/pages/DashboardPage.tsx",
           "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-22",
-        "summary": "Create a Terms of Service page at route /terms displaying all 11 sections: (1) Acceptance of Terms, (2) User Responsibilities, (3) Content Submission, (4) Community Standards, (5) Platform Use, (6) Data & Privacy, (7) Legal Compliance, (8) Limitation of Liability, (9) Termination, (10) Updates to Terms, (11) Contact. Render the full text provided by the user for each section. Style the page using the Global Nexus blue (#1A6FBF) and black (#1a1a1a) color theme, consistent with the rest of the platform. The Hindi/English language toggle UI must remain intact and functional; the legal text itself is displayed in English only regardless of the active language. Register the /terms route in App.tsx.",
+        "id": "REQ-29",
+        "summary": "Build the User Management tab inside DashboardPage.tsx (visible to Admin role only). This tab contains: (1) An 'Assign Role' form with two inputs — a Principal ID text field and a role selector dropdown (options: Writer, Editor, Publisher, Admin) — plus an 'Assign' button that calls useAssignRoleWithAutoId. On success, display the generated auto-ID in a success banner (e.g. 'Assigned! ID: writer_003'). (2) A full User Registry table listing all assigned users with columns: Auto-Generated ID, Role badge, Principal ID (truncated, with copy button), and a 'Revoke' action button that calls useRevokeRole. The table must show an empty state message if no users are assigned.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/TermsOfServicePage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/UserManagement.tsx",
+          "frontend/src/pages/DashboardPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/TermsOfServicePage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/UserManagement.tsx",
+          "frontend/src/pages/DashboardPage.tsx"
         ]
       },
       {
-        "id": "REQ-23",
-        "summary": "Update the site footer to add 'Privacy Policy' and 'Terms of Service' links alongside the existing 'About' link. The Privacy Policy link must navigate to /privacy and the Terms of Service link must navigate to /terms. Both links must be visually prominent and consistent with the existing footer navigation style. The footer copyright line, Global Nexus branding, and all existing footer links (About, Contact, category links) must remain unchanged.",
+        "id": "REQ-30",
+        "summary": "Update the Layout nav component (frontend/src/components/Layout.tsx) so that after a user logs in via Internet Identity: (1) The nav displays the user's auto-generated ID (from useMyProfile) as a styled label — e.g. 'writer_001'; (2) A role badge is shown next to the ID using a color-coded chip (Admin = dark blue, Editor = green, Writer = teal, Publisher = orange); (3) The existing copyable Principal ID display (PrincipalIdDisplay component) remains visible; (4) A 'Dashboard' link appears in the nav pointing to /dashboard; (5) If the user has no assigned role (useMyProfile returns null), no ID or role badge is shown — only the Principal ID and Dashboard link. All of this is only visible when authenticated.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Layout.tsx",
+          "frontend/src/components/Layout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Layout.tsx"
+        ]
+      },
+      {
+        "id": "REQ-31",
+        "summary": "In the existing AdminDashboardPage.tsx, migrate the Article Management and Citizen Post Moderation panels so they are also rendered inside the new DashboardPage.tsx Admin view tabs (Article Management tab and Citizen Post Moderation tab). The existing /admin route and AdminDashboardPage.tsx must remain functional for backward compatibility — it may re-use or import the same ArticleManagement and CitizenPostModeration components. Ensure no duplication of logic; both pages should use the same shared components.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/DashboardPage.tsx",
+          "frontend/src/pages/AdminDashboardPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/DashboardPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-32",
+        "summary": "Add English and Hindi translation strings to frontend/src/constants/translations.ts for all new UI strings introduced by the dashboard and role system. Required keys include: dashboard (Dashboard), userManagement (User Management), assignRole (Assign Role), roleRegistry (Role Registry), autoGeneratedId (Auto-Generated ID), revokeRole (Revoke), roleBadge labels for admin/writer/editor/publisher, noRoleAssigned (You have not been assigned a role yet. Please contact the admin.), assignSuccess (Assigned! ID: {id}), and any form labels and button text. All new static UI strings in DashboardPage.tsx and the nav additions must reference these translation keys via the existing useTranslation hook.",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/constants/translations.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/Layout.tsx",
           "frontend/src/constants/translations.ts"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
     "frontend/src/components/Layout.tsx",
+    "frontend/src/components/UserManagement.tsx",
     "frontend/src/constants/translations.ts",
-    "frontend/src/pages/PrivacyPolicyPage.tsx",
-    "frontend/src/pages/TermsOfServicePage.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/DashboardPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

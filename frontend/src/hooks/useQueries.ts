@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Article, CitizenPost, Comment, MediaItem, UserProfile, ArticleCategory, CitizenPostStatus } from '../backend';
+import type { Article, CitizenPost, Comment, MediaItem, UserProfile, ArticleCategory, CitizenPostStatus, UserRegistryEntry, UserRole } from '../backend';
+import type { Principal } from '@icp-sdk/core/principal';
 
 // ── Articles ──────────────────────────────────────────────────────────────────
 
@@ -237,5 +238,70 @@ export function useIsAdmin() {
     },
     enabled: !!actor && !isFetching,
     staleTime: 60_000,
+  });
+}
+
+// ── Role System ───────────────────────────────────────────────────────────────
+
+export function useMyProfile() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const query = useQuery<UserRegistryEntry | null>({
+    queryKey: ['myProfile'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getMyProfile();
+    },
+    enabled: !!actor && !actorFetching,
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
+}
+
+export function useUserRegistry() {
+  const { actor, isFetching } = useActor();
+  return useQuery<Array<{ principal: Principal; role: UserRole; autoId: string }>>({
+    queryKey: ['userRegistry'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getUserRegistry();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 30_000,
+  });
+}
+
+export function useAssignRoleWithAutoId() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ principal, role }: { principal: Principal; role: UserRole }) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.assignRoleWithAutoId(principal, role);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userRegistry'] });
+      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
+    },
+  });
+}
+
+export function useRevokeRole() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (principal: Principal) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.revokeRole(principal);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userRegistry'] });
+      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
+    },
   });
 }

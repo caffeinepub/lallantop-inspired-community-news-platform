@@ -7,41 +7,6 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export type Timestamp = bigint;
-export interface Comment {
-    id: UniqueId;
-    body: string;
-    createdAt: Timestamp;
-    authorName: string;
-    articleId?: UniqueId;
-    authorPrincipal: Principal;
-    postId?: UniqueId;
-}
-export type UniqueId = bigint;
-export interface MediaItem {
-    id: UniqueId;
-    title: string;
-    thumbnailUrl: string;
-    publishedAt: Timestamp;
-    mediaType: MediaType;
-    embedUrl: string;
-}
-export interface CitizenPost {
-    id: UniqueId;
-    status: CitizenPostStatus;
-    title: string;
-    body: string;
-    authorName: string;
-    publishedAt: Timestamp;
-    imageUrl: string;
-    category: ArticleCategory;
-    authorPrincipal: Principal;
-}
-export interface UserProfile {
-    bio: string;
-    name: string;
-    avatarUrl: string;
-}
 export interface Article {
     id: UniqueId;
     title: string;
@@ -55,6 +20,45 @@ export interface Article {
     isFeatured: boolean;
     category: ArticleCategory;
     bodyHindi: string;
+}
+export type Timestamp = bigint;
+export interface Comment {
+    id: UniqueId;
+    body: string;
+    createdAt: Timestamp;
+    authorName: string;
+    articleId?: UniqueId;
+    authorPrincipal: Principal;
+    postId?: UniqueId;
+}
+export type UniqueId = bigint;
+export interface UserRegistryEntry {
+    role: UserRole;
+    autoId: string;
+}
+export interface MediaItem {
+    id: UniqueId;
+    title: string;
+    thumbnailUrl: string;
+    publishedAt: Timestamp;
+    mediaType: MediaType;
+    embedUrl: string;
+}
+export interface UserProfile {
+    bio: string;
+    name: string;
+    avatarUrl: string;
+}
+export interface CitizenPost {
+    id: UniqueId;
+    status: CitizenPostStatus;
+    title: string;
+    body: string;
+    authorName: string;
+    publishedAt: Timestamp;
+    imageUrl: string;
+    category: ArticleCategory;
+    authorPrincipal: Principal;
 }
 export enum ArticleCategory {
     entertainment = "entertainment",
@@ -82,6 +86,7 @@ export enum UserRole {
 export interface backendInterface {
     addComment(articleId: UniqueId | null, postId: UniqueId | null, authorName: string, body: string): Promise<UniqueId>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    assignRoleWithAutoId(user: Principal, role: UserRole): Promise<string>;
     createArticle(title: string, titleHindi: string, body: string, bodyHindi: string, category: ArticleCategory, author: string, authorRole: string, imageUrl: string, isBreaking: boolean, isFeatured: boolean): Promise<UniqueId>;
     createCitizenPost(title: string, body: string, category: ArticleCategory, authorName: string, imageUrl: string): Promise<UniqueId>;
     getArticles(): Promise<Array<Article>>;
@@ -93,12 +98,18 @@ export interface backendInterface {
     getCommentsByArticle(articleId: UniqueId): Promise<Array<Comment>>;
     getFeaturedArticles(): Promise<Array<Article>>;
     getMediaItems(): Promise<Array<MediaItem>>;
-    getRoleForPrincipal(user: Principal): Promise<UserRole>;
+    getMyProfile(): Promise<UserRegistryEntry | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserRegistry(): Promise<Array<{
+        principal: Principal;
+        role: UserRole;
+        autoId: string;
+    }>>;
     initialize(): Promise<void>;
     isAdminCaller(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isEditorCaller(): Promise<boolean>;
+    revokeRole(user: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateArticleStatus(postId: UniqueId, newStatus: CitizenPostStatus): Promise<void>;
 }

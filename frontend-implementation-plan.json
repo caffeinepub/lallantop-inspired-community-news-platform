@@ -1,74 +1,124 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Privacy Policy and Terms of Service pages with footer links",
+  "title": "Admin-Assigned Auto-ID Role System with Unified Role-Adaptive Dashboard",
   "requirements": [
     {
-      "id": "REQ-21",
-      "summary": "Create Privacy Policy page at /privacy with 9 sections styled in Global Nexus theme",
+      "id": "REQ-27",
+      "summary": "Add React Query hooks for role system backend functions including useMyProfile, useUserRegistry, useAssignRoleWithAutoId, and useRevokeRole with proper cache invalidation",
       "acceptanceCriteria": [
-        "Navigating to /privacy renders the Privacy Policy page without errors",
-        "All 9 sections (Introduction, Data Collection, User Consent, Data Usage, Legal Compliance, Data Security, User Rights, Transparency & Updates, Contact) are visible with their full text",
-        "Page background, headings, and accent elements use the Global Nexus blue (#1A6FBF) and black (#1a1a1a) theme",
-        "The Hindi/English language toggle button remains visible and functional on the page",
-        "Legal body text is displayed in English regardless of the active language selection"
+        "useMyProfile returns the logged-in user's { autoId, role } or null when unassigned",
+        "useAssignRoleWithAutoId mutation triggers a getUserRegistry and useMyProfile cache invalidation on success",
+        "useRevokeRole mutation invalidates the user registry cache on success",
+        "All hooks are exported from a single file consistent with the existing useQueries.ts pattern"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/PrivacyPolicyPage.tsx",
-          "operation": "create",
-          "description": "Create the Privacy Policy page component displaying all 9 sections (Introduction, Data Collection, User Consent, Data Usage, Legal Compliance, Data Security, User Rights, Transparency & Updates, Contact) with their full text as provided by the user. Style the page using Global Nexus blue (#1A6FBF) for headers and accents, and black (#1a1a1a) for text, matching the existing platform theme defined in frontend/tailwind.config.js. The page must display within the Layout component so the Hindi/English language toggle UI remains visible and functional. The legal text itself must remain in English regardless of the active language selection. Structure the page with a page title, followed by each section with a heading and body text rendered in a readable, accessible format."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Register the /privacy route in the TanStack Router route tree. Import the PrivacyPolicyPage component and add a new route configuration for the path '/privacy' alongside the existing routes (home, category, article, citizen-news, multimedia, admin, about). Ensure the route is wrapped by the Layout component so navigation and language toggle remain functional."
+          "description": "Add React Query hooks for the role system: useMyProfile (query hook calling getMyProfile), useUserRegistry (query hook calling getUserRegistry for admin-only use), useAssignRoleWithAutoId (mutation hook calling assignRoleWithAutoId with principal and role parameters), and useRevokeRole (mutation hook calling revokeRole with principal parameter). Ensure useAssignRoleWithAutoId and useRevokeRole invalidate both 'myProfile' and 'userRegistry' query keys on success. Use the authorization component's pattern for authenticated queries."
         }
       ]
     },
     {
-      "id": "REQ-22",
-      "summary": "Create Terms of Service page at /terms with 11 sections styled in Global Nexus theme",
+      "id": "REQ-28",
+      "summary": "Create unified DashboardPage with role-adaptive views: Admin (three tabs), Writer/Editor (article management), Publisher (review panel), and Unassigned (contact admin message)",
       "acceptanceCriteria": [
-        "Navigating to /terms renders the Terms of Service page without errors",
-        "All 11 sections (Acceptance of Terms, User Responsibilities, Content Submission, Community Standards, Platform Use, Data & Privacy, Legal Compliance, Limitation of Liability, Termination, Updates to Terms, Contact) are visible with their full text",
-        "Page background, headings, and accent elements use the Global Nexus blue (#1A6FBF) and black (#1a1a1a) theme",
-        "The Hindi/English language toggle button remains visible and functional on the page",
-        "Legal body text is displayed in English regardless of the active language selection"
+        "Unauthenticated users are redirected away from /dashboard to the homepage",
+        "Admin-role users see three tabs: User Management, Article Management, Citizen Post Moderation",
+        "Writer/Editor-role users see only a create/manage articles panel",
+        "Publisher-role users see only a review/publish content panel",
+        "Unassigned users see the 'contact admin' message and their copyable Principal ID",
+        "/dashboard route is registered in App.tsx"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/TermsOfServicePage.tsx",
+          "path": "frontend/src/pages/DashboardPage.tsx",
           "operation": "create",
-          "description": "Create the Terms of Service page component displaying all 11 sections (Acceptance of Terms, User Responsibilities, Content Submission, Community Standards, Platform Use, Data & Privacy, Legal Compliance, Limitation of Liability, Termination, Updates to Terms, Contact) with their full text as provided by the user. Style the page using Global Nexus blue (#1A6FBF) for headers and accents, and black (#1a1a1a) for text, matching the existing platform theme defined in frontend/tailwind.config.js. The page must display within the Layout component so the Hindi/English language toggle UI remains visible and functional. The legal text itself must remain in English regardless of the active language selection. Structure the page with a page title, followed by each section with a heading and body text rendered in a readable, accessible format."
+          "description": "Create a unified dashboard page that uses useMyProfile to fetch the logged-in user's role and renders four distinct views: (1) Admin view with a tabbed interface containing 'User Management', 'Article Management', and 'Citizen Post Moderation' tabs; (2) Writer/Editor view with a panel to create and manage own articles; (3) Publisher view with a panel to review and approve pending articles; (4) Unassigned view showing a centered message 'You have not been assigned a role yet. Please contact the admin.' with the user's copyable Principal ID. Use useInternetIdentity to check authentication and redirect unauthenticated users to the homepage. Use shadcn/ui Tabs component for the admin tabbed interface. Reference translation keys from constants/translations.ts via useTranslation."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Register the /terms route in the TanStack Router route tree. Import the TermsOfServicePage component and add a new route configuration for the path '/terms' alongside the existing routes (home, category, article, citizen-news, multimedia, admin, about, privacy). Ensure the route is wrapped by the Layout component so navigation and language toggle remain functional."
+          "description": "Register the /dashboard route in the TanStack Router route tree, importing DashboardPage and adding it to the routes configuration alongside existing routes like /admin, /about, etc."
         }
       ]
     },
     {
-      "id": "REQ-23",
-      "summary": "Add Privacy Policy and Terms of Service links to the footer navigation",
+      "id": "REQ-29",
+      "summary": "Build User Management tab with role assignment form and user registry table showing auto-generated IDs, roles, principals, and revoke actions",
       "acceptanceCriteria": [
-        "Footer displays a 'Privacy Policy' link that navigates to /privacy",
-        "Footer displays a 'Terms of Service' link that navigates to /terms",
-        "Both new links appear alongside the existing 'About' link in the footer navigation",
-        "All previously existing footer links (About, Contact, category links) and copyright text remain intact",
-        "New links are styled consistently with the existing footer link style"
+        "Submitting the Assign Role form with a valid Principal and selected role calls the backend and displays the returned auto-ID in a success banner",
+        "The user registry table updates immediately after a successful assignment",
+        "Each registry row shows the auto-ID, a styled role badge, truncated Principal ID, and a copy button",
+        "Clicking 'Revoke' removes the user from the registry and the table updates accordingly",
+        "Empty state message is shown when no users have been assigned"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/UserManagement.tsx",
+          "operation": "create",
+          "description": "Create a User Management component visible only to Admin role. Include two sections: (1) An 'Assign Role' form with a Principal ID text input, a role selector dropdown (options: Writer, Editor, Publisher, Admin mapped to backend UserRole enum), and an 'Assign' button that calls useAssignRoleWithAutoId. Display the returned auto-ID in a success banner on successful assignment (e.g., 'Assigned! ID: writer_003'). (2) A User Registry table using useUserRegistry that lists all assigned users with columns: Auto-Generated ID, Role badge (color-coded: Admin=dark blue, Editor=green, Writer=teal, Publisher=orange), truncated Principal ID with a copy button, and a 'Revoke' action button calling useRevokeRole. Show an empty state message when no users are assigned. Use shadcn/ui components (Form, Input, Select, Table, Badge, Button, Alert). Reference translation keys via useTranslation."
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Import and render the UserManagement component inside the Admin view's 'User Management' tab panel."
+        }
+      ]
+    },
+    {
+      "id": "REQ-30",
+      "summary": "Update Layout nav to display user's auto-generated ID, color-coded role badge, Dashboard link, and existing Principal ID display after login",
+      "acceptanceCriteria": [
+        "Authenticated user with an assigned role sees their auto-ID and a color-coded role badge in the nav",
+        "Authenticated user with no assigned role sees only their Principal ID and Dashboard link (no ID label or badge)",
+        "The 'Dashboard' nav link routes to /dashboard",
+        "The existing PrincipalIdDisplay component and login/logout button behavior are unchanged",
+        "All new nav elements are hidden when the user is not authenticated"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Layout.tsx",
           "operation": "modify",
-          "description": "Update the footer section to add 'Privacy Policy' and 'Terms of Service' links alongside the existing 'About' link. The Privacy Policy link must navigate to /privacy and the Terms of Service link must navigate to /terms. Both links must use the same styling as the existing footer links (text-gray-400 hover:text-white transition-colors). Ensure the links support the current language context by using translations from frontend/src/constants/translations.ts for the link labels. Position the new links in the footer navigation so they appear with the existing About link, maintaining visual consistency and alignment with the current footer layout. Do not modify the existing copyright line, Global Nexus branding, category links, or any other footer elements."
+          "description": "Update the navigation component to call useMyProfile. When authenticated and useMyProfile returns a role assignment, display: (1) the user's auto-generated ID as a styled label (e.g., 'writer_001'); (2) a color-coded role badge next to the ID using a Badge component (Admin=dark blue, Editor=green, Writer=teal, Publisher=orange); (3) a 'Dashboard' link pointing to /dashboard; (4) the existing PrincipalIdDisplay component. If useMyProfile returns null (unassigned user), show only the Principal ID and Dashboard link without the auto-ID label or role badge. All new elements are visible only when authenticated. Use translation keys via useTranslation for the Dashboard link label."
+        }
+      ]
+    },
+    {
+      "id": "REQ-31",
+      "summary": "Migrate Article Management and Citizen Post Moderation panels into DashboardPage Admin view tabs while maintaining backward compatibility with existing /admin route",
+      "acceptanceCriteria": [
+        "Article Management and Citizen Post Moderation functionality is accessible from /dashboard (Admin view tabs)",
+        "The existing /admin route still renders and works correctly",
+        "ArticleManagement and CitizenPostModeration are shared components used by both pages with no logic duplication"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "operation": "modify",
+          "description": "Import the existing ArticleManagement and CitizenPostModeration components and render them inside the Admin view's 'Article Management' tab and 'Citizen Post Moderation' tab respectively. These are the same components currently used in AdminDashboardPage.tsx, ensuring no logic duplication."
         },
+        {
+          "path": "frontend/src/pages/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Verify that AdminDashboardPage.tsx continues to import and use the shared ArticleManagement and CitizenPostModeration components without any changes to maintain backward compatibility with the existing /admin route."
+        }
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "summary": "Add English and Hindi translation strings for all new dashboard and role system UI elements",
+      "acceptanceCriteria": [
+        "All new dashboard and role system UI strings have both 'en' and 'hi' entries in translations.ts",
+        "Switching the language toggle to Hindi renders all new UI strings in Hindi",
+        "No hardcoded English strings exist in DashboardPage.tsx or the new nav additions"
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/constants/translations.ts",
           "operation": "modify",
-          "description": "Add translation keys for 'Privacy Policy' and 'Terms of Service' link labels in both English and Hindi. Add new keys under an appropriate section (e.g., 'footer' or 'navigation') in both the English and Hindi translation objects. The English labels should be 'Privacy Policy' and 'Terms of Service'. The Hindi labels should be appropriate translations (e.g., 'गोपनीयता नीति' for Privacy Policy and 'सेवा की शर्तें' for Terms of Service). Ensure the keys are consistently named and accessible to the Layout component."
+          "description": "Add English and Hindi translation keys for the new dashboard and role system UI. Required keys include: dashboard (Dashboard), userManagement (User Management), assignRole (Assign Role), roleRegistry (Role Registry), autoGeneratedId (Auto-Generated ID), revokeRole (Revoke), principalId (Principal ID), roleBadge labels for admin/writer/editor/publisher roles, noRoleAssigned (You have not been assigned a role yet. Please contact the admin.), assignSuccess (Assigned! ID: {id}), writerEditorView (My Articles), publisherView (Review Content), createArticle (Create Article), manageArticles (Manage Articles), reviewPending (Review Pending), approvePending (Approve), emptyRegistry (No users assigned yet), and any other form labels, button text, or status messages introduced by the dashboard components. Ensure all new UI strings in DashboardPage.tsx, UserManagement.tsx, and Layout.tsx reference these translation keys."
         }
       ]
     }

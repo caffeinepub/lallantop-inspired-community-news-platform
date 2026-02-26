@@ -15,6 +15,7 @@ import CitizenNewsPage from './pages/CitizenNewsPage';
 import CitizenPostDetailPage from './pages/CitizenPostDetailPage';
 import MultimediaPage from './pages/MultimediaPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import DashboardPage from './pages/DashboardPage';
 import AboutPage from './pages/AboutPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -70,6 +71,12 @@ const adminRoute = createRoute({
   component: AdminDashboardPage,
 });
 
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard',
+  component: DashboardPage,
+});
+
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/about',
@@ -96,6 +103,7 @@ const routeTree = rootRoute.addChildren([
   citizenPostRoute,
   multimediaRoute,
   adminRoute,
+  dashboardRoute,
   aboutRoute,
   privacyRoute,
   termsRoute,

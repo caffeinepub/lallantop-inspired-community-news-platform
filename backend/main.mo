@@ -1,13 +1,16 @@
 import Map "mo:core/Map";
-import Text "mo:core/Text";
 import Iter "mo:core/Iter";
+import Text "mo:core/Text";
 import List "mo:core/List";
 import Principal "mo:core/Principal";
+import Migration "migration";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+// Apply migration on upgrade
+(with migration = Migration.run)
 actor {
   type UniqueId = Nat;
   type Timestamp = Time.Time;
@@ -77,28 +80,34 @@ actor {
     publishedAt : Timestamp;
   };
 
-  // User profile type required by the frontend
   type UserProfile = {
     name : Text;
     bio : Text;
     avatarUrl : Text;
   };
 
-  // State
+  type UserRegistryEntry = {
+    autoId : Text;
+    role : AccessControl.UserRole;
+  };
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
   var nextId = 1;
+  var userRegistryCounter : Nat = 0;
 
   let articles = Map.empty<UniqueId, Article>();
   let citizenPosts = Map.empty<UniqueId, CitizenPost>();
   let comments = Map.empty<UniqueId, Comment>();
   let mediaItems = Map.empty<UniqueId, MediaItem>();
   let userProfiles = Map.empty<Principal, UserProfile>();
+  let userRegistry = Map.empty<Principal, UserRegistryEntry>();
 
   var isInitialized = false;
 
-  // Public Functions
+  // ── Public Functions ───────────────────────────────────────────────
+
   public shared ({ caller }) func initialize() : async () {
     AccessControl.initialize(accessControlState, caller, "", "");
     if (isInitialized) { Runtime.trap("Already initialized") };
@@ -107,14 +116,13 @@ actor {
     seedMediaItems();
   };
 
-  // Helper to get next unique ID
   func getNextId() : UniqueId {
     let id = nextId;
     nextId += 1;
     id;
   };
 
-  // ── User Profile Functions (required by frontend) ──────────────────────────
+  // ── User Profile Functions ─────────────────────────────────────────
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -124,7 +132,6 @@ actor {
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    // Admins can view any profile; users can only view their own
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
@@ -138,27 +145,63 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // ── Role Management ────────────────────────────────────────────────────────
+  // ── Role Management ────────────────────────────────────────────────
 
-  public query ({ caller }) func getRoleForPrincipal(user : Principal) : async AccessControl.UserRole {
-    AccessControl.getUserRole(accessControlState, user);
+  public shared ({ caller }) func assignRoleWithAutoId(user : Principal, role : AccessControl.UserRole) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can assign roles");
+    };
+
+    let autoId = switch (role) {
+      case (#admin) { "admin_" # userRegistryCounter.toText() };
+      case (#user) { "user_" # userRegistryCounter.toText() };
+      case (#guest) { "guest_" # userRegistryCounter.toText() };
+    };
+
+    let entry : UserRegistryEntry = { autoId; role };
+    userRegistry.add(user, entry);
+
+    userRegistryCounter += 1;
+    autoId;
   };
 
-  // assignRole is provided by MixinAuthorization (admin-only guard is inside
-  // AccessControl.assignRole itself, so no extra check is needed here).
+  public query ({ caller }) func getMyProfile() : async ?UserRegistryEntry {
+    userRegistry.get(caller);
+  };
+
+  public shared ({ caller }) func revokeRole(user : Principal) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can revoke roles");
+    };
+    userRegistry.remove(user);
+  };
+
+  public query ({ caller }) func getUserRegistry() : async [{ principal : Principal; autoId : Text; role : AccessControl.UserRole }] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can access the user registry");
+    };
+
+    let entries = List.empty<{ principal : Principal; autoId : Text; role : AccessControl.UserRole }>();
+    for ((principal, entry) in userRegistry.entries()) {
+      entries.add({
+        principal;
+        autoId = entry.autoId;
+        role = entry.role;
+      });
+    };
+    entries.toArray();
+  };
 
   public query ({ caller }) func isAdminCaller() : async Bool {
     AccessControl.isAdmin(accessControlState, caller);
   };
 
   public query ({ caller }) func isEditorCaller() : async Bool {
-    // Editors are mapped to the #user role in the access-control module
     AccessControl.hasPermission(accessControlState, caller, #user);
   };
 
-  // ── Queries ────────────────────────────────────────────────────────────────
+  // ── Queries ────────────────────────────────────────────────────────
 
-  // Public read – no auth required
   public query func getArticles() : async [Article] {
     articles.values().toArray();
   };
@@ -187,9 +230,8 @@ actor {
     mediaItems.values().toArray();
   };
 
-  // ── Mutations ──────────────────────────────────────────────────────────────
+  // ── Mutations ──────────────────────────────────────────────────────
 
-  // Citizen posts require a logged-in (non-anonymous) user
   public shared ({ caller }) func createCitizenPost(
     title : Text,
     body : Text,
@@ -216,7 +258,6 @@ actor {
     id;
   };
 
-  // Comments require a logged-in (non-anonymous) user
   public shared ({ caller }) func addComment(
     articleId : ?UniqueId,
     postId : ?UniqueId,
@@ -240,7 +281,6 @@ actor {
     id;
   };
 
-  // Article creation is admin-only (as specified in the implementation plan)
   public shared ({ caller }) func createArticle(
     title : Text,
     titleHindi : Text,
@@ -275,13 +315,13 @@ actor {
     id;
   };
 
-  // Citizen-post moderation is available to admins and editors (#user role)
   public shared ({ caller }) func updateArticleStatus(
     postId : UniqueId,
     newStatus : CitizenPostStatus,
   ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only admins or editors can update post status");
+    // Only admins can approve or reject citizen posts
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update post status");
     };
     switch (citizenPosts.get(postId)) {
       case (null) { Runtime.trap("Post not found") };
@@ -294,7 +334,7 @@ actor {
     };
   };
 
-  // ── Seed Data ──────────────────────────────────────────────────────────────
+  // ── Seed Data ──────────────────────────────────────────────────────
 
   func seedArticles() {
     let initialArticles = [
@@ -508,6 +548,188 @@ actor {
         isBreaking = true;
         isFeatured = false;
       },
+
+      // New seeded articles for each category
+
+      // India
+      {
+        id = getNextId();
+        title = "India's Space Ambitions Soar";
+        titleHindi = "भारत की अंतरिक्ष महत्वाकांक्षाएँ बढ़ीं";
+        body = "India has announced plans for new space missions, including a manned mission to Mars by 2030 and expanded satellite launches.";
+        bodyHindi = "भारत ने 2030 तक मंगल ग्रह पर मानव मिशन समेत नए अंतरिक्ष अभियानों की योजना बनाई है।";
+        category = #india;
+        author = "Ritu Malhotra";
+        authorRole = "Science Editor";
+        imageUrl = "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800";
+        publishedAt = Time.now();
+        isBreaking = false;
+        isFeatured = true;
+      },
+      {
+        id = getNextId();
+        title = "Digital India Expands Broadband Access";
+        titleHindi = "डिजिटल इंडिया ने ब्रॉडबैंड एक्सेस का विस्तार किया";
+        body = "The government has launched a new initiative to provide broadband internet to rural villages, improving connectivity and access to digital services.";
+        bodyHindi = "सरकार ने ग्रामीण गांवों में ब्रॉडबैंड इंटरनेट प्रदान करने की नई पहल शुरू की है।";
+        category = #india;
+        author = "Ajay Singh";
+        authorRole = "Technology Editor";
+        imageUrl = "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=800";
+        publishedAt = Time.now();
+        isBreaking = true;
+        isFeatured = false;
+      },
+
+      // World
+      {
+        id = getNextId();
+        title = "Global Vaccination Drives Reach New Milestone";
+        titleHindi = "वैश्विक टीकाकरण अभियानों में नई उपलब्धि";
+        body = "International organizations have reported record progress in vaccination drives, reaching remote regions and improving global health outcomes.";
+        bodyHindi = "अंतर्राष्ट्रीय संगठनों ने दूरदराज के क्षेत्रों में टीकाकरण अभियानों में रिकॉर्ड प्रगति की सूचना दी है।";
+        category = #world;
+        author = "Emily Watson";
+        authorRole = "Health Correspondent";
+        imageUrl = "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=800";
+        publishedAt = Time.now();
+        isBreaking = false;
+        isFeatured = true;
+      },
+      {
+        id = getNextId();
+        title = "World Education Summit Promotes Learning Equality";
+        titleHindi = "विश्व शिक्षा शिखर सम्मेलन ने शिक्षा समानता को बढ़ावा दिया";
+        body = "Leaders from around the globe have gathered to discuss initiatives aimed at promoting equal access to quality education.";
+        bodyHindi = "दुनिया भर के नेता गुणवत्तापूर्ण शिक्षा के समान पहुंच को बढ़ावा देने के लिए पहलों पर चर्चा करने के लिए एकत्रित हुए हैं।";
+        category = #world;
+        author = "Lina Garcia";
+        authorRole = "Education Reporter";
+        imageUrl = "https://images.unsplash.com/photo-1482062364825-616fd23b8fc1?w=800";
+        publishedAt = Time.now();
+        isBreaking = true;
+        isFeatured = false;
+      },
+
+      // Sports
+      {
+        id = getNextId();
+        title = "India Shines in International Cricket League";
+        titleHindi = "अंतर्राष्ट्रीय क्रिकेट लीग में भारत ने चमक बिखेरी";
+        body = "Indian cricket players have shown outstanding performance in the latest international league, bringing home several awards.";
+        bodyHindi = "भारतीय क्रिकेट खिलाड़ियों ने नवीनतम अंतर्राष्ट्रीय लीग में उत्कृष्ट प्रदर्शन किया।";
+        category = #sports;
+        author = "Rajesh Patel";
+        authorRole = "Sports Analyst";
+        imageUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800";
+        publishedAt = Time.now();
+        isBreaking = false;
+        isFeatured = true;
+      },
+      {
+        id = getNextId();
+        title = "Olympic Games: Indian Contingent Gears Up";
+        titleHindi = "ओलंपिक खेलों के लिए भारतीय दल तैयार";
+        body = "Indian athletes are in spirit and readiness as they prepare for upcoming Olympic competitions.";
+        bodyHindi = "भारतीय एथलीट आगामी ओलंपिक प्रतियोगिताओं की तैयारी में पूरी उत्साह और तत्परता दिखा रहे हैं।";
+        category = #sports;
+        author = "Meera Dubey";
+        authorRole = "Sports Correspondent";
+        imageUrl = "https://images.unsplash.com/photo-1519864600265-abb113f9c3e1?w=800";
+        publishedAt = Time.now();
+        isBreaking = true;
+        isFeatured = false;
+      },
+
+      // Entertainment
+      {
+        id = getNextId();
+        title = "Bollywood Embraces Digital Film Releases";
+        titleHindi = "बॉलीवुड ने डिजिटल फिल्म रिलीज़ को अपनाया";
+        body = "With the changing landscape of cinema, Bollywood is increasingly embracing digital-first releases.";
+        bodyHindi = "बदलते सिनेमा परिदृश्य के साथ, बॉलीवुड डिजिटल-फर्स्ट रिलीज़ को तेजी से अपना रहा है।";
+        category = #entertainment;
+        author = "Divya Sharma";
+        authorRole = "Entertainment Reporter";
+        imageUrl = "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800";
+        publishedAt = Time.now();
+        isBreaking = false;
+        isFeatured = true;
+      },
+      {
+        id = getNextId();
+        title = "Indie Music Scene Booms in India";
+        titleHindi = "भारत में इंडी म्यूजिक सीन की शानदार बढ़ोतरी";
+        body = "Independent music in India is booming with new artists entering the scene.";
+        bodyHindi = "भारत में इंडिपेंडेंट म्यूजिक सेक्टर तेजी से बढ़ रहा है और नए कलाकार इसमें अपनी जगह बना रहे हैं।";
+        category = #entertainment;
+        author = "Rohan Jain";
+        authorRole = "Music Analyst";
+        imageUrl = "https://images.unsplash.com/photo-1488129320317-6d079724b4a7?w=800";
+        publishedAt = Time.now();
+        isBreaking = true;
+        isFeatured = false;
+      },
+
+      // Technology
+      {
+        id = getNextId();
+        title = "India Leads in ICT Innovation";
+        titleHindi = "आईसीटी नवाचारों में भारत अग्रणी";
+        body = "India continues to lead in ICT (Information and Communication Technology) innovations, with new startups emerging across all fields.";
+        bodyHindi = "भारत आईसीटी (सूचना और संचार प्रौद्योगिकी) नवाचारों में अग्रणी बनता जा रहा है।";
+        category = #technology;
+        author = "Sapna Rao";
+        authorRole = "Tech Editor";
+        imageUrl = "https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?w=800";
+        publishedAt = Time.now();
+        isBreaking = false;
+        isFeatured = true;
+      },
+      {
+        id = getNextId();
+        title = "Breakthroughs in AI Healthcare in India";
+        titleHindi = "भारत में एआई हेल्थकेयर में बड़ी उपलब्धियां";
+        body = "AI-powered healthcare solutions are making waves in India, providing faster diagnoses and personalized treatment plans.";
+        bodyHindi = "एआई-आधारित हेल्थकेयर समाधान भारत में त्वरित निदान और व्यक्तिगत इलाज की दिशा निर्धारित कर रहे हैं।";
+        category = #technology;
+        author = "Manish Verma";
+        authorRole = "Healthcare Correspondent";
+        imageUrl = "https://images.unsplash.com/photo-1482062364825-616fd23b8fc1?w=800";
+        publishedAt = Time.now();
+        isBreaking = true;
+        isFeatured = false;
+      },
+
+      // Business
+      {
+        id = getNextId();
+        title = "India's E-Commerce Sector Grows Rapidly";
+        titleHindi = "भारत का ई-कॉमर्स क्षेत्र तेजी से बढ़ा";
+        body = "India's e-commerce sector is experiencing rapid growth, with more businesses and consumers moving online.";
+        bodyHindi = "भारत का ई-कॉमर्स क्षेत्र तेज़ी से बढ़ रहा है, अधिक व्यवसाय और उपभोक्ता ऑनलाइन हो रहे हैं।";
+        category = #business;
+        author = "Kiran Joshi";
+        authorRole = "Business Analyst";
+        imageUrl = "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800";
+        publishedAt = Time.now();
+        isBreaking = false;
+        isFeatured = true;
+      },
+      {
+        id = getNextId();
+        title = "Financial Inclusion Reaches Rural India";
+        titleHindi = "वित्तीय समावेशन ग्रामीण भारत तक पहुँचा";
+        body = "Efforts to promote financial inclusion are making significant progress in rural India, with new banking and fintech initiatives.";
+        bodyHindi = "ग्रामीण भारत में वित्तीय समावेशन को प्रोत्साहित करने के प्रयासों ने महत्वपूर्ण प्रगति की है।";
+        category = #business;
+        author = "Pooja Deshmukh";
+        authorRole = "Economics Reporter";
+        imageUrl = "https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=800";
+        publishedAt = Time.now();
+        isBreaking = true;
+        isFeatured = false;
+      }
     ];
 
     for (article in initialArticles.values()) {
@@ -517,6 +739,7 @@ actor {
 
   func seedMediaItems() {
     let initialMedia = [
+      // Existing media items
       {
         id = getNextId();
         mediaType = #video;
@@ -581,6 +804,56 @@ actor {
         thumbnailUrl = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400";
         publishedAt = Time.now();
       },
+
+      // New seeded media items
+      {
+        id = getNextId();
+        mediaType = #video;
+        title = "The Rise of Indian Startups";
+        embedUrl = "https://www.youtube.com/embed/exampleStartup";
+        thumbnailUrl = "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800";
+        publishedAt = Time.now();
+      },
+      {
+        id = getNextId();
+        mediaType = #video;
+        title = "India's Renewable Energy Initiatives";
+        embedUrl = "https://www.youtube.com/embed/exampleRenewable";
+        thumbnailUrl = "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800";
+        publishedAt = Time.now();
+      },
+      {
+        id = getNextId();
+        mediaType = #podcast;
+        title = "Women Leaders in Tech";
+        embedUrl = "https://open.spotify.com/episode/exampleWomenTech";
+        thumbnailUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800";
+        publishedAt = Time.now();
+      },
+      {
+        id = getNextId();
+        mediaType = #podcast;
+        title = "Wellness Trends in India";
+        embedUrl = "https://open.spotify.com/episode/exampleWellness";
+        thumbnailUrl = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800";
+        publishedAt = Time.now();
+      },
+      {
+        id = getNextId();
+        mediaType = #reel;
+        title = "Fitness Tips in 30 Seconds";
+        embedUrl = "https://www.youtube.com/shorts/exampleFitness";
+        thumbnailUrl = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800";
+        publishedAt = Time.now();
+      },
+      {
+        id = getNextId();
+        mediaType = #reel;
+        title = "Quick Tech News";
+        embedUrl = "https://www.youtube.com/shorts/exampleTechNews";
+        thumbnailUrl = "https://images.unsplash.com/photo-1519864600265-abb113f9c3e1?w=800";
+        publishedAt = Time.now();
+      }
     ];
 
     for (media in initialMedia.values()) {

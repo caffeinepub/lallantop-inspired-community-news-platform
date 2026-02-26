@@ -71,6 +71,7 @@ export interface UserProfile {
   'name' : string,
   'avatarUrl' : string,
 }
+export interface UserRegistryEntry { 'role' : UserRole, 'autoId' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -81,6 +82,7 @@ export interface _SERVICE {
     UniqueId
   >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'assignRoleWithAutoId' : ActorMethod<[Principal, UserRole], string>,
   'createArticle' : ActorMethod<
     [
       string,
@@ -109,12 +111,17 @@ export interface _SERVICE {
   'getCommentsByArticle' : ActorMethod<[UniqueId], Array<Comment>>,
   'getFeaturedArticles' : ActorMethod<[], Array<Article>>,
   'getMediaItems' : ActorMethod<[], Array<MediaItem>>,
-  'getRoleForPrincipal' : ActorMethod<[Principal], UserRole>,
+  'getMyProfile' : ActorMethod<[], [] | [UserRegistryEntry]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getUserRegistry' : ActorMethod<
+    [],
+    Array<{ 'principal' : Principal, 'role' : UserRole, 'autoId' : string }>
+  >,
   'initialize' : ActorMethod<[], undefined>,
   'isAdminCaller' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isEditorCaller' : ActorMethod<[], boolean>,
+  'revokeRole' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateArticleStatus' : ActorMethod<[UniqueId, CitizenPostStatus], undefined>,
 }

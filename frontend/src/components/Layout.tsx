@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
+import { useGetCallerUserProfile, useMyProfile } from '../hooks/useQueries';
 import { useTranslation } from '../hooks/useTranslation';
+import { UserRole } from '../backend';
 import BreakingNewsTicker from './BreakingNewsTicker';
 import LoginButton from './LoginButton';
 import LanguageToggle from './LanguageToggle';
 import ProfileSetupModal from './ProfileSetupModal';
 import PrincipalIdDisplay from './PrincipalIdDisplay';
-import { Menu, X, Heart, Globe } from 'lucide-react';
+import { Menu, X, Heart, LayoutDashboard } from 'lucide-react';
 
 const NAV_CATEGORIES = [
   { key: 'india' },
@@ -21,9 +22,28 @@ const NAV_CATEGORIES = [
 
 type CategoryKey = typeof NAV_CATEGORIES[number]['key'];
 
+function RoleBadgeNav({ role }: { role: UserRole }) {
+  const styles: Record<UserRole, string> = {
+    [UserRole.admin]: 'bg-blue-900/80 text-blue-200 border-blue-700/50',
+    [UserRole.user]: 'bg-teal-800/80 text-teal-200 border-teal-600/50',
+    [UserRole.guest]: 'bg-gray-700/80 text-gray-200 border-gray-600/50',
+  };
+  const labels: Record<UserRole, string> = {
+    [UserRole.admin]: 'Admin',
+    [UserRole.user]: 'User',
+    [UserRole.guest]: 'Guest',
+  };
+  return (
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border ${styles[role] ?? 'bg-gray-700 text-gray-200 border-gray-600'}`}>
+      {labels[role] ?? role}
+    </span>
+  );
+}
+
 export default function Layout() {
-  const { identity, isInitializing } = useInternetIdentity();
+  const { identity } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
+  const { data: myProfile } = useMyProfile();
   const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -101,12 +121,21 @@ export default function Layout() {
               <LanguageToggle />
               <LoginButton />
               {isAuthenticated && (
-                <button
-                  onClick={() => navigate({ to: '/admin' })}
-                  className="hidden sm:flex items-center text-[10px] font-bold text-white/60 hover:text-white/90 transition-colors px-1.5 py-1 rounded hover:bg-white/10"
-                >
-                  {t.nav.admin}
-                </button>
+                <>
+                  <button
+                    onClick={() => navigate({ to: '/dashboard' })}
+                    className="hidden sm:flex items-center gap-1 text-[10px] font-bold text-white/70 hover:text-white/90 transition-colors px-1.5 py-1 rounded hover:bg-white/10"
+                  >
+                    <LayoutDashboard size={11} />
+                    {t.nav.dashboard}
+                  </button>
+                  <button
+                    onClick={() => navigate({ to: '/admin' })}
+                    className="hidden sm:flex items-center text-[10px] font-bold text-white/60 hover:text-white/90 transition-colors px-1.5 py-1 rounded hover:bg-white/10"
+                  >
+                    {t.nav.admin}
+                  </button>
+                </>
               )}
               {/* Mobile menu toggle */}
               <button
@@ -118,14 +147,26 @@ export default function Layout() {
             </div>
           </div>
 
-          {/* Principal ID display bar — shown when authenticated */}
+          {/* Principal ID + role info bar — shown when authenticated */}
           {isAuthenticated && (
             <div className="border-t border-white/5 bg-black/20">
-              <div className="max-w-[1400px] mx-auto px-3 py-1.5 flex items-center gap-2">
+              <div className="max-w-[1400px] mx-auto px-3 py-1.5 flex items-center gap-3 flex-wrap">
                 <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider flex-shrink-0">
                   {t.auth.yourPrincipalId}:
                 </span>
                 <PrincipalIdDisplay />
+                {myProfile && (
+                  <>
+                    <span className="text-white/20 text-[10px]">|</span>
+                    <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider flex-shrink-0">
+                      {t.dashboard.yourAutoId}:
+                    </span>
+                    <span className="font-mono text-[10px] font-bold text-news-blue-light">
+                      {myProfile.autoId}
+                    </span>
+                    <RoleBadgeNav role={myProfile.role} />
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -167,6 +208,16 @@ export default function Layout() {
               >
                 {t.nav.multimedia}
               </Link>
+              {isAuthenticated && (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-white/80 hover:text-white py-2 text-sm font-semibold border-b border-white/5 flex items-center gap-1.5"
+                >
+                  <LayoutDashboard size={13} />
+                  {t.nav.dashboard}
+                </Link>
+              )}
               <Link
                 to="/about"
                 onClick={() => setMobileMenuOpen(false)}
@@ -196,6 +247,9 @@ export default function Layout() {
         <BreakingNewsTicker />
       </header>
 
+      {/* Profile setup modal */}
+      <ProfileSetupModal open={showProfileSetup} />
+
       {/* Main content */}
       <main className="flex-1">
         <Outlet />
@@ -203,111 +257,59 @@ export default function Layout() {
 
       {/* Footer */}
       <footer className="bg-news-charcoal text-white/70 mt-8">
-        <div className="max-w-[1400px] mx-auto px-4 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Brand column */}
-            <div className="md:col-span-1">
-              <Link to="/" className="inline-block mb-3">
+        <div className="max-w-[1400px] mx-auto px-3 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-3">
                 <img
                   src="/assets/logo.png"
                   alt="Global Nexus"
-                  className="h-14 w-auto"
+                  className="h-8 w-auto"
                   onError={(e) => {
                     const el = e.target as HTMLImageElement;
                     el.style.display = 'none';
                   }}
                 />
-              </Link>
-              <p className="text-xs leading-relaxed text-white/60">
-                A multilingual news and policy platform dedicated to empowering communities through real-time reporting, AI-driven analysis, and citizen engagement.
+                <span className="font-headline font-black text-lg text-white">
+                  <span className="text-news-blue">GLOBAL</span> NEXUS
+                </span>
+              </div>
+              <p className="text-xs leading-relaxed text-white/50 max-w-xs">
+                India's trusted source for breaking news, in-depth analysis, and citizen journalism.
               </p>
             </div>
 
-            {/* Categories column */}
+            {/* Quick Links */}
             <div>
-              <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wide border-b border-news-blue/40 pb-2">
-                Categories
-              </h4>
-              <ul className="space-y-2 text-xs">
-                {NAV_CATEGORIES.map(({ key }) => (
-                  <li key={key}>
-                    <Link
-                      to="/category/$categoryName"
-                      params={{ categoryName: key }}
-                      className="hover:text-news-blue-light transition-colors"
-                    >
-                      {navLabels[key]}
-                    </Link>
-                  </li>
-                ))}
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Quick Links</h4>
+              <ul className="space-y-1.5 text-xs">
+                <li><Link to="/" className="hover:text-white transition-colors">{t.nav.home}</Link></li>
+                <li><Link to="/citizen-news" className="hover:text-white transition-colors">{t.nav.citizenReports}</Link></li>
+                <li><Link to="/multimedia" className="hover:text-white transition-colors">{t.nav.multimedia}</Link></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">{t.footer.about}</Link></li>
               </ul>
             </div>
 
-            {/* Platform column */}
+            {/* Legal */}
             <div>
-              <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wide border-b border-news-blue/40 pb-2">
-                Platform
-              </h4>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <Link to="/citizen-news" className="hover:text-news-blue-light transition-colors">
-                    {t.nav.citizenReports}
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/multimedia" className="hover:text-news-blue-light transition-colors">
-                    {t.nav.multimedia}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* About & Legal column */}
-            <div>
-              <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wide border-b border-news-blue/40 pb-2">
-                About
-              </h4>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <Link
-                    to="/about"
-                    className="flex items-center gap-1.5 text-news-blue-light hover:text-white font-semibold transition-colors"
-                  >
-                    <Globe size={12} />
-                    {t.footer.about}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/privacy"
-                    className="hover:text-news-blue-light transition-colors"
-                  >
-                    {t.footer.privacy}
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/terms"
-                    className="hover:text-news-blue-light transition-colors"
-                  >
-                    {t.footer.terms}
-                  </Link>
-                </li>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white/40 mb-3">Legal</h4>
+              <ul className="space-y-1.5 text-xs">
+                <li><Link to="/privacy" className="hover:text-white transition-colors">{t.footer.privacy}</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">{t.footer.terms}</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px]">
+          <div className="border-t border-white/10 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-white/40">
             <span>© {new Date().getFullYear()} Global Nexus. {t.footer.copyright}</span>
             <span className="flex items-center gap-1">
-              {t.footer.builtWith}{' '}
-              <Heart size={11} className="fill-news-blue text-news-blue mx-0.5" />{' '}
-              {t.footer.using}{' '}
+              {t.footer.builtWith} <Heart size={10} className="text-news-blue fill-news-blue mx-0.5" /> {t.footer.using}{' '}
               <a
-                href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'global-nexus')}`}
+                href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(typeof window !== 'undefined' ? window.location.hostname : 'global-nexus')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-news-blue-light hover:underline font-semibold"
+                className="text-news-blue hover:text-news-blue-light transition-colors font-semibold"
               >
                 caffeine.ai
               </a>
@@ -315,9 +317,6 @@ export default function Layout() {
           </div>
         </div>
       </footer>
-
-      {/* Profile setup modal */}
-      {!isInitializing && <ProfileSetupModal open={showProfileSetup} />}
     </div>
   );
 }
