@@ -1,11 +1,10 @@
 import Map "mo:core/Map";
-import Text "mo:core/Text";
-import List "mo:core/List";
 import Principal "mo:core/Principal";
-import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
-import MixinAuthorization "authorization/MixinAuthorization";
+import List "mo:core/List";
+import Runtime "mo:core/Runtime";
 import Migration "migration";
+import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
 (with migration = Migration.run)
@@ -107,7 +106,7 @@ actor {
   // ── Public Functions ───────────────────────────────────────────────
 
   public shared ({ caller }) func initialize() : async () {
-    if (isInitialized) { Runtime.trap("Already initialized") };
+    if (isInitialized) { return };
     isInitialized := true;
     seedArticles();
     seedMediaItems();
@@ -140,24 +139,18 @@ actor {
   // ── User Profile Functions ─────────────────────────────────────────
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    let role = AccessControl.getUserRole(accessControlState, caller);
-    if (role == #guest) {
-      return null;
-    };
+    if (caller.isAnonymous()) { return null };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
+    if (caller.isAnonymous()) { return null };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    let role = AccessControl.getUserRole(accessControlState, caller);
-    if (role == #guest) {
-      Runtime.trap("Unauthorized: Only registered users can save profiles");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Anonymous users cannot save profiles");
     };
     userProfiles.add(caller, profile);
   };
@@ -170,9 +163,9 @@ actor {
     };
 
     let autoId = switch (role) {
-      case (#admin) { "admin_" # userRegistryCounter.toText() };
-      case (#user) { "user_" # userRegistryCounter.toText() };
-      case (#guest) { "guest_" # userRegistryCounter.toText() };
+      case (#admin) { "admin_" # Nat.toText(userRegistryCounter) };
+      case (#user) { "user_" # Nat.toText(userRegistryCounter) };
+      case (#guest) { "guest_" # Nat.toText(userRegistryCounter) };
     };
 
     let entry : UserRegistryEntry = { autoId; role };
@@ -200,7 +193,7 @@ actor {
 
   public query ({ caller }) func getUserRegistry() : async [{ principal : Principal; autoId : Text; role : AccessControl.UserRole }] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can access the user registry");
+      Runtime.trap("Unauthorized: Only admins can view user registry");
     };
 
     let entries = List.empty<{ principal : Principal; autoId : Text; role : AccessControl.UserRole }>();
@@ -215,11 +208,19 @@ actor {
   };
 
   public query ({ caller }) func isAdminCaller() : async Bool {
-    AccessControl.isAdmin(accessControlState, caller);
+    try {
+      AccessControl.isAdmin(accessControlState, caller);
+    } catch (e) {
+      false;
+    };
   };
 
   public query ({ caller }) func isEditorCaller() : async Bool {
-    AccessControl.hasPermission(accessControlState, caller, #user);
+    try {
+      AccessControl.hasPermission(accessControlState, caller, #user);
+    } catch (e) {
+      false;
+    };
   };
 
   // ── Queries ────────────────────────────────────────────────────────
@@ -265,9 +266,8 @@ actor {
     authorName : Text,
     imageUrl : Text,
   ) : async UniqueId {
-    let role = AccessControl.getUserRole(accessControlState, caller);
-    if (role == #guest) {
-      Runtime.trap("Unauthorized: Only registered users can create citizen posts");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Anonymous users cannot create posts");
     };
     let id = getNextId();
     let post : CitizenPost = {
@@ -291,9 +291,8 @@ actor {
     authorName : Text,
     body : Text,
   ) : async UniqueId {
-    let role = AccessControl.getUserRole(accessControlState, caller);
-    if (role == #guest) {
-      Runtime.trap("Unauthorized: Only registered users can add comments");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Anonymous users cannot add comments");
     };
     let id = getNextId();
     let comment : Comment = {
@@ -355,10 +354,10 @@ actor {
     newStatus : CitizenPostStatus,
   ) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update post status");
+      Runtime.trap("Unauthorized: Only admins can update article status");
     };
     switch (citizenPosts.get(postId)) {
-      case (null) { Runtime.trap("Post not found") };
+      case (null) {};
       case (?post) {
         let updatedPost : CitizenPost = {
           post with status = newStatus;
@@ -551,7 +550,6 @@ actor {
 
   func seedMediaItems() {
     let initialMedia = [
-      // Existing media items
       {
         id = getNextId();
         mediaType = #video;

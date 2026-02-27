@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-router';
 import { LanguageProvider } from './contexts/LanguageContext';
 import Layout from './components/Layout';
+import AppInitializer from './components/AppInitializer';
 import HomePage from './pages/HomePage';
 import CategoryPage from './pages/CategoryPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
@@ -24,6 +25,8 @@ import TermsOfServicePage from './pages/TermsOfServicePage';
 const rootRoute = createRootRoute({
   component: () => (
     <LanguageProvider>
+      {/* AppInitializer calls actor.initialize() to bootstrap admin & seed data */}
+      <AppInitializer />
       <Layout />
     </LanguageProvider>
   ),

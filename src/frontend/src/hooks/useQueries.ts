@@ -247,7 +247,9 @@ export function useIsAdmin() {
       }
     },
     enabled: !!actor && !isFetching,
-    staleTime: 60_000,
+    // Always fetch fresh — never return a stale false from anonymous session
+    staleTime: 0,
+    refetchOnMount: 'always',
     retry: false,
   });
 }
@@ -269,7 +271,9 @@ export function useMyProfile() {
     },
     enabled: !!actor && !actorFetching,
     retry: false,
-    staleTime: 60_000,
+    // Always fetch fresh data — never use a stale cached null from an anonymous session
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   return {
