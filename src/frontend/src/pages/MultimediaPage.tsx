@@ -89,7 +89,7 @@ export default function MultimediaPage() {
                   key={item.id.toString()}
                   className="flex items-center gap-4 bg-card border border-border rounded p-3 hover:shadow-card-hover transition-shadow"
                 >
-                  <div className="w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-muted">
+                  <div className="w-16 h-16 shrink-0 rounded overflow-hidden bg-muted">
                     <img
                       src={item.thumbnailUrl}
                       alt={item.title}
@@ -107,7 +107,7 @@ export default function MultimediaPage() {
                     href={item.embedUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-shrink-0 flex items-center gap-1.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded transition-colors"
+                    className="shrink-0 flex items-center gap-1.5 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded transition-colors"
                   >
                     <Headphones size={12} />
                     {t.multimedia.listenNow}

@@ -1,18 +1,16 @@
 import Map "mo:core/Map";
-import Principal "mo:core/Principal";
-import Time "mo:core/Time";
 import List "mo:core/List";
+import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
-import Migration "migration";
+import Time "mo:core/Time";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-(with migration = Migration.run)
 actor {
   public type UniqueId = Nat;
   public type Timestamp = Time.Time;
 
-  // Enums & Types
   public type ArticleCategory = {
     #india;
     #world;
@@ -28,7 +26,6 @@ actor {
     #reel;
   };
 
-  // Models
   public type Article = {
     id : UniqueId;
     title : Text;
@@ -92,7 +89,7 @@ actor {
   include MixinAuthorization(accessControlState);
 
   var nextId = 1;
-  var userRegistryCounter : Nat = 0;
+  var userRegistryCounter = 0;
 
   let articles = Map.empty<UniqueId, Article>();
   let citizenPosts = Map.empty<UniqueId, CitizenPost>();
@@ -103,7 +100,9 @@ actor {
 
   var isInitialized = false;
 
-  // ── Public Functions ───────────────────────────────────────────────
+  public query ({ caller }) func isInitializedActor() : async Bool {
+    isInitialized;
+  };
 
   public shared ({ caller }) func initialize() : async () {
     if (isInitialized) { return };
@@ -122,12 +121,7 @@ actor {
       role = #admin;
     };
 
-    // First, directly insert into userRegistry (bypassing role checks)
     userRegistry.add(adminPrincipal, adminEntry);
-
-    // Then assign the role in the access control system
-    // This call uses the admin principal as both caller and user to bootstrap
-    AccessControl.assignRole(accessControlState, adminPrincipal, adminPrincipal, #admin);
   };
 
   func getNextId() : UniqueId {
@@ -136,15 +130,18 @@ actor {
     id;
   };
 
-  // ── User Profile Functions ─────────────────────────────────────────
-
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (caller.isAnonymous()) { return null };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller.isAnonymous()) { return null };
+    if (caller.isAnonymous()) {
+      return null;
+    };
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
     userProfiles.get(user);
   };
 
@@ -155,23 +152,20 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // ── Role Management ────────────────────────────────────────────────
-
   public shared ({ caller }) func assignRoleWithAutoId(user : Principal, role : AccessControl.UserRole) : async Text {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can assign roles");
     };
 
     let autoId = switch (role) {
-      case (#admin) { "admin_" # Nat.toText(userRegistryCounter) };
-      case (#user) { "user_" # Nat.toText(userRegistryCounter) };
-      case (#guest) { "guest_" # Nat.toText(userRegistryCounter) };
+      case (#admin) { "admin_" # userRegistryCounter.toText() };
+      case (#user) { "user_" # userRegistryCounter.toText() };
+      case (#guest) { "guest_" # userRegistryCounter.toText() };
     };
 
     let entry : UserRegistryEntry = { autoId; role };
     userRegistry.add(user, entry);
 
-    // Actually assign the role in the access control system
     AccessControl.assignRole(accessControlState, caller, user, role);
 
     userRegistryCounter += 1;
@@ -183,16 +177,20 @@ actor {
   };
 
   public shared ({ caller }) func revokeRole(user : Principal) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can revoke roles");
     };
     userRegistry.remove(user);
-    // Assign guest role, which is default
-    AccessControl.assignRole(accessControlState, caller, user, #guest);
+    AccessControl.assignRole(
+      accessControlState,
+      caller,
+      user,
+      #guest,
+    );
   };
 
   public query ({ caller }) func getUserRegistry() : async [{ principal : Principal; autoId : Text; role : AccessControl.UserRole }] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can view user registry");
     };
 
@@ -208,56 +206,44 @@ actor {
   };
 
   public query ({ caller }) func isAdminCaller() : async Bool {
-    try {
-      AccessControl.isAdmin(accessControlState, caller);
-    } catch (e) {
-      false;
-    };
+    AccessControl.isAdmin(accessControlState, caller);
   };
 
   public query ({ caller }) func isEditorCaller() : async Bool {
-    try {
-      AccessControl.hasPermission(accessControlState, caller, #user);
-    } catch (e) {
-      false;
-    };
+    AccessControl.hasPermission(accessControlState, caller, #user);
   };
 
-  // ── Queries ────────────────────────────────────────────────────────
-
-  public query func getArticles() : async [Article] {
+  public query ({ caller }) func getArticles() : async [Article] {
     articles.values().toArray();
   };
 
-  public query func getArticlesByCategory(category : ArticleCategory) : async [Article] {
+  public query ({ caller }) func getArticlesByCategory(category : ArticleCategory) : async [Article] {
     articles.values().toArray().filter(func(a : Article) : Bool { a.category == category });
   };
 
-  public query func getBreakingNews() : async [Article] {
+  public query ({ caller }) func getBreakingNews() : async [Article] {
     articles.values().toArray().filter(func(a : Article) : Bool { a.isBreaking });
   };
 
-  public query func getFeaturedArticles() : async [Article] {
+  public query ({ caller }) func getFeaturedArticles() : async [Article] {
     articles.values().toArray().filter(func(a : Article) : Bool { a.isFeatured });
   };
 
-  public query func getCitizenPosts() : async [CitizenPost] {
+  public query ({ caller }) func getCitizenPosts() : async [CitizenPost] {
     citizenPosts.values().toArray();
   };
 
-  public query func getCommentsByArticle(articleId : UniqueId) : async [Comment] {
+  public query ({ caller }) func getCommentsByArticle(articleId : UniqueId) : async [Comment] {
     comments.values().toArray().filter(func(c : Comment) : Bool { c.articleId == ?articleId });
   };
 
-  public query func getCommentsByPost(postId : UniqueId) : async [Comment] {
+  public query ({ caller }) func getCommentsByPost(postId : UniqueId) : async [Comment] {
     comments.values().toArray().filter(func(c : Comment) : Bool { c.postId == ?postId });
   };
 
-  public query func getMediaItems() : async [MediaItem] {
+  public query ({ caller }) func getMediaItems() : async [MediaItem] {
     mediaItems.values().toArray();
   };
-
-  // ── Mutations ──────────────────────────────────────────────────────
 
   public shared ({ caller }) func createCitizenPost(
     title : Text,
@@ -320,7 +306,7 @@ actor {
     isBreaking : Bool,
     isFeatured : Bool,
   ) : async UniqueId {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can create articles");
     };
     let id = getNextId();
@@ -343,7 +329,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteArticle(id : UniqueId) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can delete articles");
     };
     articles.remove(id);
@@ -353,7 +339,7 @@ actor {
     postId : UniqueId,
     newStatus : CitizenPostStatus,
   ) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can update article status");
     };
     switch (citizenPosts.get(postId)) {
@@ -366,8 +352,6 @@ actor {
       };
     };
   };
-
-  // ── Seed Data ──────────────────────────────────────────────────────
 
   func seedArticles() {
     let epsteinBody = "In January 2026, a federal court unsealed over 900 pages of documents related to Jeffrey Epstein's criminal activities, revealing a disturbing pattern of abuse involving minors and powerful individuals across multiple jurisdictions. The files expose not only the scope of Epstein's trafficking network but also systemic failures in child protection worldwide.\n\nAccording to UNICEF, approximately 138 million children globally are engaged in child labor, with 38% of all human trafficking victims being children. The Epstein case highlights a critical gap: the absence of a global auditor to monitor and enforce child protection standards across borders.\n\nKey recommendations include:\n1. Establishing UNICEF as the global auditor for child protection with enforcement powers\n2. Creating international protocols for cross-border investigation of child exploitation\n3. Closing jurisdiction gaps that allow perpetrators to evade justice\n4. Implementing mandatory reporting systems for all institutions serving children\n5. Strengthening victim support and rehabilitation programs\n\nThe international community must act decisively to prevent future cases like Epstein's and protect the world's most vulnerable population.";

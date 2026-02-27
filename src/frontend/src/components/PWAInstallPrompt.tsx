@@ -66,7 +66,7 @@ export default function PWAInstallPrompt() {
         <img
           src="/assets/icons/icon-192x192.png"
           alt="Global Nexus"
-          className="w-9 h-9 rounded-lg flex-shrink-0"
+          className="w-9 h-9 rounded-lg shrink-0"
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
           }}
@@ -77,7 +77,7 @@ export default function PWAInstallPrompt() {
         </p>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={handleInstall}
           className="flex items-center gap-1.5 bg-white text-[#1A6FBF] text-xs font-bold px-3 py-1.5 rounded-full hover:bg-white/90 transition-colors"

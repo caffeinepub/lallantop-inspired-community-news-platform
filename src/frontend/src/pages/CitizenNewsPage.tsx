@@ -58,7 +58,7 @@ export default function CitizenNewsPage() {
         {isAuthenticated && (
           <Button
             onClick={() => setModalOpen(true)}
-            className="flex-shrink-0 bg-news-blue hover:bg-news-blue-dark text-white font-bold gap-2"
+            className="shrink-0 bg-news-blue hover:bg-news-blue-dark text-white font-bold gap-2"
           >
             <PenLine size={14} />
             <span className="hidden sm:inline">{t.citizen.submitStory}</span>

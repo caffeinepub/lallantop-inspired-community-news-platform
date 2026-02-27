@@ -27,7 +27,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
         params={{ id: article.id.toString() }}
         className="flex gap-2 group hover:bg-muted/50 p-1.5 rounded transition-colors"
       >
-        <div className="w-16 h-12 flex-shrink-0 overflow-hidden rounded-sm">
+        <div className="w-16 h-12 shrink-0 overflow-hidden rounded-sm">
           <img
             src={article.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=200'}
             alt={title}

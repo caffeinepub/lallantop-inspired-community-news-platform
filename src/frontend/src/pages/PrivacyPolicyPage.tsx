@@ -115,7 +115,7 @@ export default function PrivacyPolicyPage() {
               className="bg-card border border-border rounded-lg p-6 shadow-card"
             >
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-news-blue flex items-center justify-center">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-news-blue flex items-center justify-center">
                   <span className="text-white text-xs font-black">{section.number}</span>
                 </div>
                 <div className="flex-1">
@@ -129,7 +129,7 @@ export default function PrivacyPolicyPage() {
                     <ul className="space-y-2">
                       {section.bullets.map((bullet) => (
                         <li key={bullet} className="flex items-start gap-2 text-sm text-foreground/75 leading-relaxed">
-                          <span className="mt-1.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-news-blue" />
+                          <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-news-blue" />
                           {bullet}
                         </li>
                       ))}

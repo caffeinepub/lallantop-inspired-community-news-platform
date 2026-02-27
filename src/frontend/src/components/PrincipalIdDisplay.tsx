@@ -38,14 +38,14 @@ export default function PrincipalIdDisplay() {
 
   return (
     <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] text-white/70 max-w-[220px]">
-      <KeyRound size={10} className="text-news-blue-light flex-shrink-0" />
+      <KeyRound size={10} className="text-news-blue-light shrink-0" />
       <span className="font-mono truncate flex-1" title={principalId}>
         {shortId}
       </span>
       <button
         onClick={handleCopy}
         title={copied ? 'Copied!' : 'Copy Principal ID'}
-        className="flex-shrink-0 flex items-center gap-0.5 text-white/60 hover:text-white transition-colors"
+        className="shrink-0 flex items-center gap-0.5 text-white/60 hover:text-white transition-colors"
       >
         {copied ? (
           <>

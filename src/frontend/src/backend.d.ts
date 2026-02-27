@@ -111,6 +111,7 @@ export interface backendInterface {
     isAdminCaller(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isEditorCaller(): Promise<boolean>;
+    isInitializedActor(): Promise<boolean>;
     revokeRole(user: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateArticleStatus(postId: UniqueId, newStatus: CitizenPostStatus): Promise<void>;

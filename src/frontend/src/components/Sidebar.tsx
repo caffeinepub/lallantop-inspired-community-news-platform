@@ -39,7 +39,7 @@ export default function Sidebar() {
               params={{ id: article.id.toString() }}
               className="flex items-start gap-2.5 p-2.5 hover:bg-muted/50 transition-colors group"
             >
-              <span className="text-2xl font-black text-muted-foreground/30 leading-none w-6 flex-shrink-0 mt-0.5">
+              <span className="text-2xl font-black text-muted-foreground/30 leading-none w-6 shrink-0 mt-0.5">
                 {idx + 1}
               </span>
               <div className="flex-1 min-w-0">

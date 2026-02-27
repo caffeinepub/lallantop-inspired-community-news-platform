@@ -29,7 +29,7 @@ export default function AboutPage() {
         <div className="bg-card border border-border rounded-lg overflow-hidden shadow-card mb-10">
           <div className="md:flex">
             {/* Photo */}
-            <div className="md:w-72 flex-shrink-0">
+            <div className="md:w-72 shrink-0">
               <img
                 src="/assets/WhatsApp Image 2026-02-17 at 2.19.48 PM (1).jpeg"
                 alt="Pawnesh Kumar Singh — Founder & CEO, Global Nexus"

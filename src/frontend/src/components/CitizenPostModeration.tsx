@@ -70,7 +70,7 @@ export default function CitizenPostModeration() {
                   </p>
                 </div>
                 {post.status === CitizenPostStatus.pending && (
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <Button
                       size="sm"
                       variant="outline"

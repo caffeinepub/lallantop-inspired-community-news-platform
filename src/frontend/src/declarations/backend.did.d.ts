@@ -123,6 +123,7 @@ export interface _SERVICE {
   'isAdminCaller' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isEditorCaller' : ActorMethod<[], boolean>,
+  'isInitializedActor' : ActorMethod<[], boolean>,
   'revokeRole' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateArticleStatus' : ActorMethod<[UniqueId, CitizenPostStatus], undefined>,

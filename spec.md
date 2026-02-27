@@ -1,40 +1,27 @@
-# Global Nexus
+# Global Nexus — Final Deployment Fix
 
 ## Current State
-- Full multilingual news platform (Hindi/English) live as Version 17
-- Motoko backend with articles, citizen posts, comments, media items, role system, user registry
-- Frontend: React + TypeScript + Tailwind, TanStack Router, full page set
-- Admin principal `zp4yw-opure-zd32q-abgvl-2uyfg-abiqw-tqwyy-hej2s-mzler-4n37y-dqe` bootstrapped in `initialize()` but admin access not working reliably due to corrupted canister state from repeated failed deployments
-- PWA configured (manifest.json, service worker)
-- All features: homepage, breaking news ticker, carousel hero, 6 category sections with seeded articles, citizen journalism, multimedia, unified role-adaptive dashboard, About/Founder page, Privacy Policy, Terms of Service, footer with domain + contact email
+The platform is fully built with homepage, articles, citizen journalism, multimedia, role-based dashboard, privacy/terms pages, PWA, and admin assignment. The backend has two critical compilation/runtime bugs that cause deployment failures and admin access to break.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Nothing new — final version is a clean rebuild of everything already planned
+- Nothing new
 
 ### Modify
-- **Backend**: Complete clean rewrite from scratch — same API surface, same seed data, same admin bootstrap logic, but all code regenerated fresh to eliminate any state corruption or compile errors
-- **Admin bootstrap**: Ensure `zp4yw-opure-zd32q-abgvl-2uyfg-abiqw-tqwyy-hej2s-mzler-4n37y-dqe` is hardcoded and inserted into both the `userRegistry` map AND the `AccessControl` state at `initialize()` time with zero possibility of trapping
-- **Frontend**: Ensure `useMyProfile` and dashboard role detection work correctly for the bootstrapped admin principal
+- `access-control.mo`: `getUserRole` must return `#guest` (not trap) for unknown principals
+- `access-control.mo`: Add `assignRoleDirectly` function that bypasses admin check
+- `main.mo`: `bootstrapAdmin()` must call `AccessControl.assignRoleDirectly(accessControlState, adminPrincipal, #admin)` in addition to inserting into `userRegistry`
+- `main.mo`: `initialize()` must silently return (not trap) if already initialized
+- `main.mo`: Use `Nat.toText(userRegistryCounter)` not `userRegistryCounter.toText()`
+- `main.mo`: No `migration` import, no `(with migration = ...)` actor decorator
 
 ### Remove
 - Nothing
 
 ## Implementation Plan
-1. Generate clean Motoko backend with:
-   - All same types: Article, CitizenPost, Comment, MediaItem, UserProfile, UserRegistryEntry
-   - All same query/mutation functions
-   - `initialize()` with bulletproof admin bootstrap for the hardcoded principal
-   - Full seed data (12 articles across all 6 categories + 14 media items)
-2. Fix frontend: ensure dashboard correctly reads `myProfile.role` and shows admin view for `UserRole.admin`
-3. Verify no TypeScript errors in key dashboard/auth flows
-4. Deploy and publish
+1. Regenerate backend with all bugs fixed
+2. Delegate frontend validation to frontend agent
 
 ## UX Notes
-- Global Nexus branding: blue (#1A6FBF), black (#1a1a1a), white
-- Logo: /assets/logo.png in nav and footer
-- Founder page: Pawnesh Kumar Singh with full bio at /about
-- Footer: pawneshkumarsingh@globalnexus.co.in and globalnexus.co.in
-- PWA: manifest.json + service worker for mobile installability
-- Hindi/English language toggle throughout
+- Admin principal `zp4yw-opure-zd32q-abgvl-2uyfg-abiqw-tqwyy-hej2s-mzler-4n37y-dqe` must have full access to `/dashboard` after login

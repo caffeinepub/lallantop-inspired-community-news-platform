@@ -77,7 +77,7 @@ export default function Layout() {
         <div className="bg-news-charcoal">
           <div className="max-w-[1400px] mx-auto px-3 flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
+            <Link to="/" className="shrink-0">
               <img
                 src="/assets/logo.png"
                 alt="Global Nexus"
@@ -163,14 +163,14 @@ export default function Layout() {
           {isAuthenticated && (
             <div className="border-t border-white/5 bg-black/20">
               <div className="max-w-[1400px] mx-auto px-3 py-1.5 flex items-center gap-3 flex-wrap">
-                <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider flex-shrink-0">
+                <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider shrink-0">
                   {t.auth.yourPrincipalId}:
                 </span>
                 <PrincipalIdDisplay />
                 {myProfile && (
                   <>
                     <span className="text-white/20 text-[10px]">|</span>
-                    <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider flex-shrink-0">
+                    <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider shrink-0">
                       {t.dashboard.yourAutoId}:
                     </span>
                     <span className="font-mono text-[10px] font-bold text-news-blue-light">

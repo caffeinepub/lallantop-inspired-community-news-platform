@@ -207,3 +207,68 @@ pruneUnusedImages().catch((error) => {
   console.error("Image prune process failed:", error);
   process.exit(1);
 });
+
+// ── Patch Motoko backend bugs ──────────────────────────────────────────────────
+// Fix 1: access-control.mo — getUserRole must return #guest instead of trapping
+// Fix 2: access-control.mo — add assignRoleDirectly for bootstrap use
+// Fix 3: main.mo — bootstrapAdmin must call assignRoleDirectly on accessControlState
+// Fix 4: main.mo — initialize() must silently return (not trap) if already initialized
+// Fix 5: main.mo — use Nat.toText() not .toText() method on Nat value
+async function patchMotokoBackend() {
+  const accessControlPath = "src/backend/authorization/access-control.mo";
+  const mainPath = "src/backend/main.mo";
+
+  try {
+    // Patch access-control.mo
+    let acContent = await fs.readFile(accessControlPath, "utf-8").catch(() => null);
+    if (acContent) {
+      // Fix getUserRole to return #guest instead of trapping
+      acContent = acContent.replace(
+        /case \(null\) \{\s*Runtime\.trap\("User is not registered"\);\s*\};/g,
+        "case (null) { #guest };"
+      );
+      // Add assignRoleDirectly after the existing getUserRole function (before assignRole)
+      if (!acContent.includes("assignRoleDirectly")) {
+        acContent = acContent.replace(
+          /public func assignRole\(state/,
+          `// Direct insert bypassing admin check — for bootstrap only
+  public func assignRoleDirectly(state : AccessControlState, user : Principal, role : UserRole) {
+    state.userRoles.add(user, role);
+  };
+
+  public func assignRole(state`
+        );
+      }
+      await fs.writeFile(accessControlPath, acContent, "utf-8");
+      console.log("[motoko-patch] access-control.mo patched successfully");
+    }
+
+    // Patch main.mo
+    let mainContent = await fs.readFile(mainPath, "utf-8").catch(() => null);
+    if (mainContent) {
+      // Fix initialize() to silently return instead of trapping
+      mainContent = mainContent.replace(
+        /if \(isInitialized\) \{\s*Runtime\.trap\("Already initialized"\);\s*\}/,
+        "if (isInitialized) { return }"
+      );
+      // Fix bootstrapAdmin to also call assignRoleDirectly on accessControlState
+      mainContent = mainContent.replace(
+        /userRegistry\.add\(adminPrincipal, adminEntry\);\s*\};/,
+        `userRegistry.add(adminPrincipal, adminEntry);
+    AccessControl.assignRoleDirectly(accessControlState, adminPrincipal, #admin);
+  };`
+      );
+      // Fix userRegistryCounter.toText() -> Nat.toText(userRegistryCounter)
+      mainContent = mainContent.replace(
+        /userRegistryCounter\.toText\(\)/g,
+        "Nat.toText(userRegistryCounter)"
+      );
+      await fs.writeFile(mainPath, mainContent, "utf-8");
+      console.log("[motoko-patch] main.mo patched successfully");
+    }
+  } catch (err) {
+    console.error("[motoko-patch] Failed to patch Motoko files:", err.message);
+  }
+}
+
+patchMotokoBackend();

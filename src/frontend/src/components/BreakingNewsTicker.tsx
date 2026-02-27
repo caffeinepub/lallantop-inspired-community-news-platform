@@ -14,7 +14,7 @@ export default function BreakingNewsTicker() {
   return (
     <div className="bg-news-blue text-white flex items-stretch overflow-hidden" style={{ height: '32px' }}>
       {/* Label */}
-      <div className="flex items-center gap-1.5 px-3 bg-news-blue-dark flex-shrink-0 z-10">
+      <div className="flex items-center gap-1.5 px-3 bg-news-blue-dark shrink-0 z-10">
         <Zap size={12} className="fill-white" />
         <span className="text-[11px] font-black uppercase tracking-widest whitespace-nowrap">
           {t.home.breakingNews}

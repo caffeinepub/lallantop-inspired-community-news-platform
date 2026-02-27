@@ -194,6 +194,7 @@ export interface backendInterface {
     isAdminCaller(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isEditorCaller(): Promise<boolean>;
+    isInitializedActor(): Promise<boolean>;
     revokeRole(user: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateArticleStatus(postId: UniqueId, newStatus: CitizenPostStatus): Promise<void>;
@@ -538,6 +539,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.isEditorCaller();
+            return result;
+        }
+    }
+    async isInitializedActor(): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.isInitializedActor();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.isInitializedActor();
             return result;
         }
     }
