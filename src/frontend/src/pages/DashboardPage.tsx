@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useMyProfile, useGetCallerUserProfile } from '../hooks/useQueries';
@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ArticleManagement from '../components/ArticleManagement';
 import CitizenPostModeration from '../components/CitizenPostModeration';
 import UserManagement from '../components/UserManagement';
+import MultimediaManagement from '../components/MultimediaManagement';
+import PageContentEditor from '../components/PageContentEditor';
 import PrincipalIdDisplay from '../components/PrincipalIdDisplay';
 import {
   ShieldAlert,
@@ -19,6 +21,8 @@ import {
   BookOpen,
   UserCircle,
   LayoutDashboard,
+  Film,
+  FileEdit,
 } from 'lucide-react';
 
 function RoleBadge({ role }: { role: UserRole }) {
@@ -111,7 +115,7 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue="users">
-          <TabsList className="mb-5 bg-muted/50 border border-border">
+          <TabsList className="mb-5 bg-muted/50 border border-border flex-wrap h-auto gap-0.5 p-1">
             <TabsTrigger
               value="users"
               className="flex items-center gap-1.5 text-xs font-bold data-[state=active]:bg-news-charcoal data-[state=active]:text-white"
@@ -133,6 +137,20 @@ export default function DashboardPage() {
               <ShieldAlert size={12} />
               {t.admin.postModeration}
             </TabsTrigger>
+            <TabsTrigger
+              value="multimedia"
+              className="flex items-center gap-1.5 text-xs font-bold data-[state=active]:bg-news-charcoal data-[state=active]:text-white"
+            >
+              <Film size={12} />
+              Multimedia
+            </TabsTrigger>
+            <TabsTrigger
+              value="pages"
+              className="flex items-center gap-1.5 text-xs font-bold data-[state=active]:bg-news-charcoal data-[state=active]:text-white"
+            >
+              <FileEdit size={12} />
+              Pages
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -143,6 +161,12 @@ export default function DashboardPage() {
           </TabsContent>
           <TabsContent value="moderation">
             <CitizenPostModeration />
+          </TabsContent>
+          <TabsContent value="multimedia">
+            <MultimediaManagement />
+          </TabsContent>
+          <TabsContent value="pages">
+            <PageContentEditor />
           </TabsContent>
         </Tabs>
       </div>
@@ -173,7 +197,41 @@ export default function DashboardPage() {
             <RoleBadge role={UserRole.user} />
           </div>
         </div>
-        <ArticleManagement />
+
+        <Tabs defaultValue="articles">
+          <TabsList className="mb-5 bg-muted/50 border border-border">
+            <TabsTrigger
+              value="articles"
+              className="flex items-center gap-1.5 text-xs font-bold data-[state=active]:bg-news-charcoal data-[state=active]:text-white"
+            >
+              <Newspaper size={12} />
+              {t.admin.articleManagement}
+            </TabsTrigger>
+            <TabsTrigger
+              value="multimedia"
+              className="flex items-center gap-1.5 text-xs font-bold data-[state=active]:bg-news-charcoal data-[state=active]:text-white"
+            >
+              <Film size={12} />
+              Multimedia
+            </TabsTrigger>
+            <TabsTrigger
+              value="pages"
+              className="flex items-center gap-1.5 text-xs font-bold data-[state=active]:bg-news-charcoal data-[state=active]:text-white"
+            >
+              <FileEdit size={12} />
+              Pages
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="articles">
+            <ArticleManagement />
+          </TabsContent>
+          <TabsContent value="multimedia">
+            <MultimediaManagement />
+          </TabsContent>
+          <TabsContent value="pages">
+            <PageContentEditor />
+          </TabsContent>
+        </Tabs>
       </div>
     );
   }

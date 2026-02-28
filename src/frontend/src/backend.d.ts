@@ -41,6 +41,7 @@ export interface MediaItem {
     title: string;
     thumbnailUrl: string;
     publishedAt: Timestamp;
+    fileData?: string;
     mediaType: MediaType;
     embedUrl: string;
 }
@@ -89,7 +90,9 @@ export interface backendInterface {
     assignRoleWithAutoId(user: Principal, role: UserRole): Promise<string>;
     createArticle(title: string, titleHindi: string, body: string, bodyHindi: string, category: ArticleCategory, author: string, authorRole: string, imageUrl: string, isBreaking: boolean, isFeatured: boolean): Promise<UniqueId>;
     createCitizenPost(title: string, body: string, category: ArticleCategory, authorName: string, imageUrl: string): Promise<UniqueId>;
+    createMediaItem(mediaType: MediaType, title: string, embedUrl: string, thumbnailUrl: string, fileData: string | null): Promise<UniqueId>;
     deleteArticle(id: UniqueId): Promise<void>;
+    deleteMediaItem(id: UniqueId): Promise<void>;
     getArticles(): Promise<Array<Article>>;
     getArticlesByCategory(category: ArticleCategory): Promise<Array<Article>>;
     getBreakingNews(): Promise<Array<Article>>;
@@ -101,6 +104,7 @@ export interface backendInterface {
     getFeaturedArticles(): Promise<Array<Article>>;
     getMediaItems(): Promise<Array<MediaItem>>;
     getMyProfile(): Promise<UserRegistryEntry | null>;
+    getPageContent(key: string): Promise<string | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getUserRegistry(): Promise<Array<{
         principal: Principal;
@@ -114,5 +118,7 @@ export interface backendInterface {
     isInitializedActor(): Promise<boolean>;
     revokeRole(user: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    savePageContent(key: string, content: string): Promise<void>;
+    updateArticle(id: UniqueId, title: string, titleHindi: string, body: string, bodyHindi: string, category: ArticleCategory, author: string, authorRole: string, imageUrl: string, isBreaking: boolean, isFeatured: boolean): Promise<void>;
     updateArticleStatus(postId: UniqueId, newStatus: CitizenPostStatus): Promise<void>;
 }

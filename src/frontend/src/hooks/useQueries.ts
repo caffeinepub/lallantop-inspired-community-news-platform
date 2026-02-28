@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Article, CitizenPost, Comment, MediaItem, UserProfile, ArticleCategory, CitizenPostStatus, UserRegistryEntry, UserRole } from '../backend';
+import type { Article, CitizenPost, Comment, MediaItem, UserProfile, ArticleCategory, CitizenPostStatus, UserRegistryEntry, UserRole, MediaType } from '../backend';
 import type { Principal } from '@icp-sdk/core/principal';
 
 // ── Articles ──────────────────────────────────────────────────────────────────
@@ -162,6 +162,69 @@ export function useGetMediaItems() {
   });
 }
 
+export function useCreateMediaItem() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      mediaType: MediaType;
+      title: string;
+      embedUrl: string;
+      thumbnailUrl: string;
+      fileData: string | null;
+    }) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.createMediaItem(data.mediaType, data.title, data.embedUrl, data.thumbnailUrl, data.fileData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mediaItems'] });
+    },
+  });
+}
+
+export function useDeleteMediaItem() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.deleteMediaItem(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mediaItems'] });
+    },
+  });
+}
+
+// ── Page Content ──────────────────────────────────────────────────────────────
+
+export function useGetPageContent(key: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<string | null>({
+    queryKey: ['pageContent', key],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getPageContent(key);
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 0,
+  });
+}
+
+export function useSavePageContent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ key, content }: { key: string; content: string }) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.savePageContent(key, content);
+    },
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['pageContent', variables.key] });
+    },
+  });
+}
+
 // ── User Profile ──────────────────────────────────────────────────────────────
 
 export function useGetCallerUserProfile() {
@@ -223,6 +286,50 @@ export function useCreateArticle() {
       if (!actor) throw new Error('Not connected');
       return actor.createArticle(
         data.title, data.titleHindi, data.body, data.bodyHindi,
+        data.category, data.author, data.authorRole, data.imageUrl,
+        data.isBreaking, data.isFeatured
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+    },
+  });
+}
+
+export function useDeleteArticle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.deleteArticle(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['articles'] });
+    },
+  });
+}
+
+export function useUpdateArticle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      id: bigint;
+      title: string;
+      titleHindi: string;
+      body: string;
+      bodyHindi: string;
+      category: ArticleCategory;
+      author: string;
+      authorRole: string;
+      imageUrl: string;
+      isBreaking: boolean;
+      isFeatured: boolean;
+    }) => {
+      if (!actor) throw new Error('Not connected');
+      return actor.updateArticle(
+        data.id, data.title, data.titleHindi, data.body, data.bodyHindi,
         data.category, data.author, data.authorRole, data.imageUrl,
         data.isBreaking, data.isFeatured
       );

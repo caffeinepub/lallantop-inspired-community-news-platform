@@ -1,15 +1,8 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
-import Principal "mo:core/Principal";
-import Time "mo:core/Time";
-import List "mo:core/List";
-import AccessControl "authorization/access-control";
+import Text "mo:core/Text";
 
 module {
-  type UniqueId = Nat;
-  type Timestamp = Time.Time;
-
-  // Enums & Types
   type ArticleCategory = {
     #india;
     #world;
@@ -25,9 +18,8 @@ module {
     #reel;
   };
 
-  // Models
   type Article = {
-    id : UniqueId;
+    id : Nat;
     title : Text;
     titleHindi : Text;
     body : Text;
@@ -36,46 +28,52 @@ module {
     author : Text;
     authorRole : Text;
     imageUrl : Text;
-    publishedAt : Timestamp;
+    publishedAt : Int;
     isBreaking : Bool;
     isFeatured : Bool;
   };
 
-  type CitizenPostStatus = {
-    #pending;
-    #approved;
-    #rejected;
-  };
+  type CitizenPostStatus = { #pending; #approved; #rejected };
 
   type CitizenPost = {
-    id : UniqueId;
+    id : Nat;
     title : Text;
     body : Text;
     category : ArticleCategory;
     authorPrincipal : Principal;
     authorName : Text;
     imageUrl : Text;
-    publishedAt : Timestamp;
+    publishedAt : Int;
     status : CitizenPostStatus;
   };
 
   type Comment = {
-    id : UniqueId;
-    articleId : ?UniqueId;
-    postId : ?UniqueId;
+    id : Nat;
+    articleId : ?Nat;
+    postId : ?Nat;
     authorPrincipal : Principal;
     authorName : Text;
     body : Text;
-    createdAt : Timestamp;
+    createdAt : Int;
   };
 
-  type MediaItem = {
-    id : UniqueId;
+  type OldMediaItem = {
+    id : Nat;
     mediaType : MediaType;
     title : Text;
     embedUrl : Text;
     thumbnailUrl : Text;
-    publishedAt : Timestamp;
+    publishedAt : Int;
+  };
+
+  type NewMediaItem = {
+    id : Nat;
+    mediaType : MediaType;
+    title : Text;
+    embedUrl : Text;
+    thumbnailUrl : Text;
+    publishedAt : Int;
+    fileData : ?Text;
   };
 
   type UserProfile = {
@@ -86,16 +84,20 @@ module {
 
   type UserRegistryEntry = {
     autoId : Text;
-    role : AccessControl.UserRole;
+    role : {
+      #admin;
+      #user;
+      #guest;
+    };
   };
 
   type OldActor = {
     nextId : Nat;
     userRegistryCounter : Nat;
-    articles : Map.Map<UniqueId, Article>;
-    citizenPosts : Map.Map<UniqueId, CitizenPost>;
-    comments : Map.Map<UniqueId, Comment>;
-    mediaItems : Map.Map<UniqueId, MediaItem>;
+    articles : Map.Map<Nat, Article>;
+    citizenPosts : Map.Map<Nat, CitizenPost>;
+    comments : Map.Map<Nat, Comment>;
+    mediaItems : Map.Map<Nat, OldMediaItem>;
     userProfiles : Map.Map<Principal, UserProfile>;
     userRegistry : Map.Map<Principal, UserRegistryEntry>;
     isInitialized : Bool;
@@ -104,16 +106,26 @@ module {
   type NewActor = {
     nextId : Nat;
     userRegistryCounter : Nat;
-    articles : Map.Map<UniqueId, Article>;
-    citizenPosts : Map.Map<UniqueId, CitizenPost>;
-    comments : Map.Map<UniqueId, Comment>;
-    mediaItems : Map.Map<UniqueId, MediaItem>;
+    articles : Map.Map<Nat, Article>;
+    citizenPosts : Map.Map<Nat, CitizenPost>;
+    comments : Map.Map<Nat, Comment>;
+    mediaItems : Map.Map<Nat, NewMediaItem>;
     userProfiles : Map.Map<Principal, UserProfile>;
     userRegistry : Map.Map<Principal, UserRegistryEntry>;
+    pageContent : Map.Map<Text, Text>;
     isInitialized : Bool;
   };
 
   public func run(old : OldActor) : NewActor {
-    { old with isInitialized = false };
+    let newMediaItems = old.mediaItems.map<Nat, OldMediaItem, NewMediaItem>(
+      func(_id, oldMediaItem) {
+        { oldMediaItem with fileData = null };
+      }
+    );
+    {
+      old with
+      mediaItems = newMediaItems;
+      pageContent = Map.empty<Text, Text>();
+    };
   };
 };

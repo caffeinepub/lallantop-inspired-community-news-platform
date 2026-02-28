@@ -1,8 +1,12 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Globe, BookOpen, MapPin, Award, ChevronRight, Mail } from 'lucide-react';
+import { useGetPageContent } from '../hooks/useQueries';
 
 export default function AboutPage() {
+  const { data: backendContent } = useGetPageContent('about');
+  const hasBackendContent = backendContent !== null && backendContent !== undefined && backendContent.trim().length > 0;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero banner */}
@@ -86,23 +90,29 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="space-y-5 text-foreground/80 text-sm leading-relaxed">
-            <p>
-              <strong className="text-foreground">Pawnesh Kumar Singh</strong> is the visionary Founder and CEO of Global Nexus, a multilingual news and policy platform dedicated to empowering communities through real-time reporting, AI-driven analysis, and citizen engagement. With a Master's degree in Geography and a specialization in climate resilience, Pawnesh brings a multidisciplinary lens to global development, public policy, and child-centered advocacy.
-            </p>
+          {hasBackendContent ? (
+            <pre className="whitespace-pre-wrap text-sm text-foreground/80 leading-relaxed font-sans">
+              {backendContent}
+            </pre>
+          ) : (
+            <div className="space-y-5 text-foreground/80 text-sm leading-relaxed">
+              <p>
+                <strong className="text-foreground">Pawnesh Kumar Singh</strong> is the visionary Founder and CEO of Global Nexus, a multilingual news and policy platform dedicated to empowering communities through real-time reporting, AI-driven analysis, and citizen engagement. With a Master's degree in Geography and a specialization in climate resilience, Pawnesh brings a multidisciplinary lens to global development, public policy, and child-centered advocacy.
+              </p>
 
-            <p>
-              He is a strategic communicator known for his analytical rigor, cross-cultural fluency, and commitment to equity-focused solutions. Through Global Nexus, Pawnesh merges grassroots reporting with cutting-edge technology — creating a space where local voices meet global narratives.
-            </p>
+              <p>
+                He is a strategic communicator known for his analytical rigor, cross-cultural fluency, and commitment to equity-focused solutions. Through Global Nexus, Pawnesh merges grassroots reporting with cutting-edge technology — creating a space where local voices meet global narratives.
+              </p>
 
-            <p>
-              His experience spans research on child trafficking, climate migration, and constitutional ethics, and he has authored influential articles and led community mapping initiatives.
-            </p>
+              <p>
+                His experience spans research on child trafficking, climate migration, and constitutional ethics, and he has authored influential articles and led community mapping initiatives.
+              </p>
 
-            <p>
-              Pawnesh's leadership reflects a deep belief in inclusive journalism, civic empowerment, and the transformative power of information. Under his guidance, Global Nexus is not just a news platform — it's a movement for transparency, dialogue, and sustainable change.
-            </p>
-          </div>
+              <p>
+                Pawnesh's leadership reflects a deep belief in inclusive journalism, civic empowerment, and the transformative power of information. Under his guidance, Global Nexus is not just a news platform — it's a movement for transparency, dialogue, and sustainable change.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Key focus areas */}

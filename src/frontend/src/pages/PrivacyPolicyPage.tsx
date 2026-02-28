@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { Shield, ChevronRight, Mail, Globe } from 'lucide-react';
+import { useGetPageContent } from '../hooks/useQueries';
 
 const sections = [
   {
@@ -78,6 +79,9 @@ const sections = [
 ];
 
 export default function PrivacyPolicyPage() {
+  const { data: backendContent } = useGetPageContent('privacy');
+  const hasBackendContent = backendContent !== null && backendContent !== undefined && backendContent.trim().length > 0;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero banner */}
@@ -108,38 +112,44 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          {sections.map((section) => (
-            <div
-              key={section.number}
-              className="bg-card border border-border rounded-lg p-6 shadow-card"
-            >
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-news-blue flex items-center justify-center">
-                  <span className="text-white text-xs font-black">{section.number}</span>
-                </div>
-                <div className="flex-1">
-                  <h2 className="font-headline font-black text-lg text-foreground mb-3">
-                    {section.title}
-                  </h2>
-                  {section.content && (
-                    <p className="text-sm text-foreground/75 leading-relaxed">{section.content}</p>
-                  )}
-                  {section.bullets && (
-                    <ul className="space-y-2">
-                      {section.bullets.map((bullet) => (
-                        <li key={bullet} className="flex items-start gap-2 text-sm text-foreground/75 leading-relaxed">
-                          <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-news-blue" />
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+        {hasBackendContent ? (
+          <pre className="whitespace-pre-wrap text-sm text-foreground/80 leading-relaxed font-sans bg-card border border-border rounded-lg p-6">
+            {backendContent}
+          </pre>
+        ) : (
+          <div className="space-y-6">
+            {sections.map((section) => (
+              <div
+                key={section.number}
+                className="bg-card border border-border rounded-lg p-6 shadow-card"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-news-blue flex items-center justify-center">
+                    <span className="text-white text-xs font-black">{section.number}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="font-headline font-black text-lg text-foreground mb-3">
+                      {section.title}
+                    </h2>
+                    {section.content && (
+                      <p className="text-sm text-foreground/75 leading-relaxed">{section.content}</p>
+                    )}
+                    {section.bullets && (
+                      <ul className="space-y-2">
+                        {section.bullets.map((bullet) => (
+                          <li key={bullet} className="flex items-start gap-2 text-sm text-foreground/75 leading-relaxed">
+                            <span className="mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full bg-news-blue" />
+                            {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* CTA */}
         <div className="mt-10 bg-news-charcoal rounded-lg p-6 flex flex-col sm:flex-row items-center justify-between gap-4">

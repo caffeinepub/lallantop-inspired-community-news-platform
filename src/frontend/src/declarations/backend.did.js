@@ -22,6 +22,11 @@ export const ArticleCategory = IDL.Variant({
   'sports' : IDL.Null,
   'world' : IDL.Null,
 });
+export const MediaType = IDL.Variant({
+  'video' : IDL.Null,
+  'reel' : IDL.Null,
+  'podcast' : IDL.Null,
+});
 export const Timestamp = IDL.Int;
 export const Article = IDL.Record({
   'id' : UniqueId,
@@ -67,16 +72,12 @@ export const Comment = IDL.Record({
   'authorPrincipal' : IDL.Principal,
   'postId' : IDL.Opt(UniqueId),
 });
-export const MediaType = IDL.Variant({
-  'video' : IDL.Null,
-  'reel' : IDL.Null,
-  'podcast' : IDL.Null,
-});
 export const MediaItem = IDL.Record({
   'id' : UniqueId,
   'title' : IDL.Text,
   'thumbnailUrl' : IDL.Text,
   'publishedAt' : Timestamp,
+  'fileData' : IDL.Opt(IDL.Text),
   'mediaType' : MediaType,
   'embedUrl' : IDL.Text,
 });
@@ -115,7 +116,13 @@ export const idlService = IDL.Service({
       [UniqueId],
       [],
     ),
+  'createMediaItem' : IDL.Func(
+      [MediaType, IDL.Text, IDL.Text, IDL.Text, IDL.Opt(IDL.Text)],
+      [UniqueId],
+      [],
+    ),
   'deleteArticle' : IDL.Func([UniqueId], [], []),
+  'deleteMediaItem' : IDL.Func([UniqueId], [], []),
   'getArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
   'getArticlesByCategory' : IDL.Func(
       [ArticleCategory],
@@ -131,6 +138,7 @@ export const idlService = IDL.Service({
   'getFeaturedArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
   'getMediaItems' : IDL.Func([], [IDL.Vec(MediaItem)], ['query']),
   'getMyProfile' : IDL.Func([], [IDL.Opt(UserRegistryEntry)], ['query']),
+  'getPageContent' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Text)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -156,6 +164,24 @@ export const idlService = IDL.Service({
   'isInitializedActor' : IDL.Func([], [IDL.Bool], ['query']),
   'revokeRole' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'savePageContent' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'updateArticle' : IDL.Func(
+      [
+        UniqueId,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        ArticleCategory,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Bool,
+        IDL.Bool,
+      ],
+      [],
+      [],
+    ),
   'updateArticleStatus' : IDL.Func([UniqueId, CitizenPostStatus], [], []),
 });
 
@@ -175,6 +201,11 @@ export const idlFactory = ({ IDL }) => {
     'india' : IDL.Null,
     'sports' : IDL.Null,
     'world' : IDL.Null,
+  });
+  const MediaType = IDL.Variant({
+    'video' : IDL.Null,
+    'reel' : IDL.Null,
+    'podcast' : IDL.Null,
   });
   const Timestamp = IDL.Int;
   const Article = IDL.Record({
@@ -221,16 +252,12 @@ export const idlFactory = ({ IDL }) => {
     'authorPrincipal' : IDL.Principal,
     'postId' : IDL.Opt(UniqueId),
   });
-  const MediaType = IDL.Variant({
-    'video' : IDL.Null,
-    'reel' : IDL.Null,
-    'podcast' : IDL.Null,
-  });
   const MediaItem = IDL.Record({
     'id' : UniqueId,
     'title' : IDL.Text,
     'thumbnailUrl' : IDL.Text,
     'publishedAt' : Timestamp,
+    'fileData' : IDL.Opt(IDL.Text),
     'mediaType' : MediaType,
     'embedUrl' : IDL.Text,
   });
@@ -273,7 +300,13 @@ export const idlFactory = ({ IDL }) => {
         [UniqueId],
         [],
       ),
+    'createMediaItem' : IDL.Func(
+        [MediaType, IDL.Text, IDL.Text, IDL.Text, IDL.Opt(IDL.Text)],
+        [UniqueId],
+        [],
+      ),
     'deleteArticle' : IDL.Func([UniqueId], [], []),
+    'deleteMediaItem' : IDL.Func([UniqueId], [], []),
     'getArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
     'getArticlesByCategory' : IDL.Func(
         [ArticleCategory],
@@ -293,6 +326,7 @@ export const idlFactory = ({ IDL }) => {
     'getFeaturedArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
     'getMediaItems' : IDL.Func([], [IDL.Vec(MediaItem)], ['query']),
     'getMyProfile' : IDL.Func([], [IDL.Opt(UserRegistryEntry)], ['query']),
+    'getPageContent' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Text)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -318,6 +352,24 @@ export const idlFactory = ({ IDL }) => {
     'isInitializedActor' : IDL.Func([], [IDL.Bool], ['query']),
     'revokeRole' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'savePageContent' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'updateArticle' : IDL.Func(
+        [
+          UniqueId,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          ArticleCategory,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Bool,
+          IDL.Bool,
+        ],
+        [],
+        [],
+      ),
     'updateArticleStatus' : IDL.Func([UniqueId, CitizenPostStatus], [], []),
   });
 };

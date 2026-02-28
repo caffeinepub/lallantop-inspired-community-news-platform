@@ -58,6 +58,7 @@ export interface MediaItem {
   'title' : string,
   'thumbnailUrl' : string,
   'publishedAt' : Timestamp,
+  'fileData' : [] | [string],
   'mediaType' : MediaType,
   'embedUrl' : string,
 }
@@ -102,7 +103,12 @@ export interface _SERVICE {
     [string, string, ArticleCategory, string, string],
     UniqueId
   >,
+  'createMediaItem' : ActorMethod<
+    [MediaType, string, string, string, [] | [string]],
+    UniqueId
+  >,
   'deleteArticle' : ActorMethod<[UniqueId], undefined>,
+  'deleteMediaItem' : ActorMethod<[UniqueId], undefined>,
   'getArticles' : ActorMethod<[], Array<Article>>,
   'getArticlesByCategory' : ActorMethod<[ArticleCategory], Array<Article>>,
   'getBreakingNews' : ActorMethod<[], Array<Article>>,
@@ -114,6 +120,7 @@ export interface _SERVICE {
   'getFeaturedArticles' : ActorMethod<[], Array<Article>>,
   'getMediaItems' : ActorMethod<[], Array<MediaItem>>,
   'getMyProfile' : ActorMethod<[], [] | [UserRegistryEntry]>,
+  'getPageContent' : ActorMethod<[string], [] | [string]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserRegistry' : ActorMethod<
     [],
@@ -126,6 +133,23 @@ export interface _SERVICE {
   'isInitializedActor' : ActorMethod<[], boolean>,
   'revokeRole' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'savePageContent' : ActorMethod<[string, string], undefined>,
+  'updateArticle' : ActorMethod<
+    [
+      UniqueId,
+      string,
+      string,
+      string,
+      string,
+      ArticleCategory,
+      string,
+      string,
+      string,
+      boolean,
+      boolean,
+    ],
+    undefined
+  >,
   'updateArticleStatus' : ActorMethod<[UniqueId, CitizenPostStatus], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

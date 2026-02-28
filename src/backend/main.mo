@@ -3,10 +3,13 @@ import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Time "mo:core/Time";
+import Text "mo:core/Text";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   public type UniqueId = Nat;
   public type Timestamp = Time.Time;
@@ -72,6 +75,7 @@ actor {
     embedUrl : Text;
     thumbnailUrl : Text;
     publishedAt : Timestamp;
+    fileData : ?Text;
   };
 
   public type UserProfile = {
@@ -97,6 +101,7 @@ actor {
   let mediaItems = Map.empty<UniqueId, MediaItem>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let userRegistry = Map.empty<Principal, UserRegistryEntry>();
+  let pageContent = Map.empty<Text, Text>();
 
   var isInitialized = false;
 
@@ -306,8 +311,8 @@ actor {
     isBreaking : Bool,
     isFeatured : Bool,
   ) : async UniqueId {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can create articles");
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users or admins can create articles");
     };
     let id = getNextId();
     let article : Article = {
@@ -328,9 +333,47 @@ actor {
     id;
   };
 
+  public shared ({ caller }) func updateArticle(
+    id : UniqueId,
+    title : Text,
+    titleHindi : Text,
+    body : Text,
+    bodyHindi : Text,
+    category : ArticleCategory,
+    author : Text,
+    authorRole : Text,
+    imageUrl : Text,
+    isBreaking : Bool,
+    isFeatured : Bool,
+  ) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users or admins can update articles");
+    };
+    switch (articles.get(id)) {
+      case (null) { Runtime.trap("Article not found") };
+      case (?_existing) {
+        let updatedArticle : Article = {
+          id;
+          title;
+          titleHindi;
+          body;
+          bodyHindi;
+          category;
+          author;
+          authorRole;
+          imageUrl;
+          publishedAt = Time.now();
+          isBreaking;
+          isFeatured;
+        };
+        articles.add(id, updatedArticle);
+      };
+    };
+  };
+
   public shared ({ caller }) func deleteArticle(id : UniqueId) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can delete articles");
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users or admins can delete articles");
     };
     articles.remove(id);
   };
@@ -351,6 +394,48 @@ actor {
         citizenPosts.add(postId, updatedPost);
       };
     };
+  };
+
+  public shared ({ caller }) func createMediaItem(
+    mediaType : MediaType,
+    title : Text,
+    embedUrl : Text,
+    thumbnailUrl : Text,
+    fileData : ?Text,
+  ) : async UniqueId {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users or admins can create media items");
+    };
+    let id = getNextId();
+    let mediaItem : MediaItem = {
+      id;
+      mediaType;
+      title;
+      embedUrl;
+      thumbnailUrl;
+      publishedAt = Time.now();
+      fileData;
+    };
+    mediaItems.add(id, mediaItem);
+    id;
+  };
+
+  public shared ({ caller }) func deleteMediaItem(id : UniqueId) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users or admins can delete media items");
+    };
+    mediaItems.remove(id);
+  };
+
+  public query ({ caller }) func getPageContent(key : Text) : async ?Text {
+    pageContent.get(key);
+  };
+
+  public shared ({ caller }) func savePageContent(key : Text, content : Text) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users or admins can save page content");
+    };
+    pageContent.add(key, content);
   };
 
   func seedArticles() {
@@ -541,6 +626,7 @@ actor {
         embedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ";
         thumbnailUrl = "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -549,6 +635,7 @@ actor {
         embedUrl = "https://www.youtube.com/embed/9bZkp7q19f0";
         thumbnailUrl = "https://img.youtube.com/vi/9bZkp7q19f0/hqdefault.jpg";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -557,6 +644,7 @@ actor {
         embedUrl = "https://www.youtube.com/embed/ZRtdQ81jPUQ";
         thumbnailUrl = "https://img.youtube.com/vi/ZRtdQ81jPUQ/hqdefault.jpg";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -565,6 +653,7 @@ actor {
         embedUrl = "https://open.spotify.com/episode/example1";
         thumbnailUrl = "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -573,6 +662,7 @@ actor {
         embedUrl = "https://open.spotify.com/episode/example2";
         thumbnailUrl = "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -581,6 +671,7 @@ actor {
         embedUrl = "https://open.spotify.com/episode/example3";
         thumbnailUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -589,6 +680,7 @@ actor {
         embedUrl = "https://www.youtube.com/shorts/example1";
         thumbnailUrl = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -597,6 +689,7 @@ actor {
         embedUrl = "https://www.youtube.com/shorts/example2";
         thumbnailUrl = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -605,6 +698,7 @@ actor {
         embedUrl = "https://www.youtube.com/embed/exampleStartup";
         thumbnailUrl = "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -613,6 +707,7 @@ actor {
         embedUrl = "https://www.youtube.com/embed/exampleRenewable";
         thumbnailUrl = "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -621,6 +716,7 @@ actor {
         embedUrl = "https://open.spotify.com/episode/exampleWomenTech";
         thumbnailUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -629,6 +725,7 @@ actor {
         embedUrl = "https://open.spotify.com/episode/exampleWellness";
         thumbnailUrl = "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -637,6 +734,7 @@ actor {
         embedUrl = "https://www.youtube.com/shorts/exampleFitness";
         thumbnailUrl = "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800";
         publishedAt = Time.now();
+        fileData = null;
       },
       {
         id = getNextId();
@@ -645,6 +743,7 @@ actor {
         embedUrl = "https://www.youtube.com/shorts/exampleTechNews";
         thumbnailUrl = "https://images.unsplash.com/photo-1519864600265-abb113f9c3e1?w=800";
         publishedAt = Time.now();
+        fileData = null;
       }
     ];
 
